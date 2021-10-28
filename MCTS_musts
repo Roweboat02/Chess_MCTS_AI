@@ -1,0 +1,25 @@
+
+
+Monte carlo tree search class and functions.
+A game needs to have:
+    Class attributes:
+    SYMBOLS : iterable
+        SYMBOLS Should include all differentiations between players.
+        Is never used strictly as a class attribute, but must be constant.
+
+    Object attributes:
+    turn : obj from SYMBOLS (i.e. int, str, ect.)
+        an object belonging to SYMBOLS which is used to denote which player
+        is expected to make an action.
+    winner : obj from SYMBOLS (i.e. int, str, ect.)
+        an object belonging to SYMBOLS which is used to denote which player
+        has won. Winner should be updated by game class after a state change.
+    Methods:
+    next_moves_list()
+        Returns a list or array of all reachable states immediately after the current game state.
+    copy()
+        Returns an identical, entirely independent copy of the game in it's current state.
+    make_move(move)
+        Change from current game state to state described with move param.
+    make_random_move()
+        Change from current game state to an immediately reachable randomly selected state.
