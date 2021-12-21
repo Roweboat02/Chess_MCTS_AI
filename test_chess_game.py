@@ -14,17 +14,12 @@ class TestChess(TestCase):
         self.game.make_move(chess.Move.from_uci('a3'))
         self.assertIsFalse(self.game.check_color())
 
-    def test_game_to_array(self):
-        self.fail()
+    def test_fog(self):
+        self.assertIsTrue(np.equal(self.game.fog,
+         np.array([[i for _ in range(8)] for i in [0,0,0,0,0,1,1,1]])))
 
-    def test_generate_fog(self):
-        self.fail()
-
-    def test_possible_next_moves(self):
-        self.fail()
-
-    def test_has_winner(self):
-        self.fail()
+    def test_game_array(self):
+        self.game.game_array
 
     def test_make_move(self):
         self.fail()
