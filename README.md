@@ -11,7 +11,7 @@ The design used is loosely based on different iterations of the Google DeepMind 
 
 
 ## Project plan:
-An implementation of the *Monte Carlo search tree* algorithm using a complete game state (no information is obscured) is used to map and evaluate possible moves via random simulation.
+An implementation of the *Monte Carlo tree search* algorithm using a complete game state (no information is obscured) is used to map and evaluate possible moves via random simulation.
 
 The neural network will take as an input:
 - The sequence of all past moves made by a player
