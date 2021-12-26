@@ -1,6 +1,9 @@
 import random
 import numpy as np
 
+"""
+INCOMPLETE!
+"""
 
 class Node:
     """
