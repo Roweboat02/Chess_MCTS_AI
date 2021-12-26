@@ -1,5 +1,7 @@
 # Chess_MCTS_AI
 
+Currently the only file that is complete/working is the fog_of_war_chess_game.py
+
 ## Intro
 This project is an attempt at making a system for training a neural network from self-play, to play an asymmetric information game, tabula rasa.
 (essentially just means a neural network that learns everything about a game where players can have different amounts of information about the game state, by playing the game and learning based on if it wins or loses.)
