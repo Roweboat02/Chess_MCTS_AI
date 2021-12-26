@@ -1,7 +1,7 @@
 # Chess_MCTS_AI
 
 ## Intro
-This project is an attempt at making a system for training a neural network from self-play to play an asymmetric information game, tabula rasa.
+This project is an attempt at making a system for training a neural network from self-play, to play an asymmetric information game, tabula rasa.
 (essentially just means a neural network that learns everything about a game where players can have different amounts of information about the game state, by playing the game and learning based on if it wins or loses.)
 
 The asymmetric game used is the fog of war (FOW) variant of chess.
