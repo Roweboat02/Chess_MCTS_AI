@@ -18,7 +18,9 @@ The neural network will take as an input:
 - A representation of the current game state
 - A vector of possible moves
 
-The input will use the imperfect (information is obscured) representations of the game. In FOW, this means the fog of the current board is applied to the board representation. Each potential move will be represented as the current board with it's fog applied, where the piece to be moved will be placed at it's destination square **WITHOUT** updating the fog from the parent state.
+The input will use the imperfect (information is obscured) representations of the game. 
+
+In FOW, this means the fog of the current board is applied to the board representation. Each potential move will be represented as the current board with it's fog applied, where the piece to be moved will be placed at it's destination square **WITHOUT** updating the fog from the parent state.
 
 The neural network will process the sequence of past moves using a recurrent neural network architecture to help emphasize the sequential nature of the data. The current game state after passing through a series of resnet blocks will be combined the the output derived from the sequence of past moves, before passing through more convolutional layers.
 
