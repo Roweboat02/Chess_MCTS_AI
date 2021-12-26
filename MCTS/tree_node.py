@@ -8,7 +8,7 @@ class Node:
     game states.
     """
 
-    def __init__(self, parent, move=None):
+    def __init__(self, game, move=None):
         """
         Node for game state.
         See module docsting for game requirements.
@@ -21,24 +21,19 @@ class Node:
             None if root
 
         """
-        # children of node
-        self.children = np.array([])
-        # Move made to arrive at node
+        self.children = None
+        self.game_state = game
         self.move = move
-        # game object
-        clone = parent.game.copy()
-        clone.make_move(move)
-        self.game = clone
-
-        # How many time a child has been expanded.
-        self.child_expansions = 0
-
-        # which player's turn it is
-        self.player = parent.player
 
         # Node stats for UCB calculation
         self.visits = 0
         self.score = 0
+
+    @classmethod
+    def from_game(): pass
+
+    @classmethod
+    def child_from_self(): pass
 
     def populate_children(self):
         """
@@ -46,7 +41,7 @@ class Node:
         with all possible next game states.
 
         """
-        self.children = np.array([Node(self, move=move) for move in self.game.legal_moves])
+        self.children = [Node.child_from_self(self, move=move) for move in self.game.legal_moves]
 
     def has_unvisited_children(self):
         """
