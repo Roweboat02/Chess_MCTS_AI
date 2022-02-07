@@ -65,7 +65,7 @@ class FOWChess:
 
     @cached_property
     def moves(self):
-        return list(self.board.legal_moves)
+        return list(self.board.pseudo_legal_moves)
 
     @cached_property
     def board_array(self):
