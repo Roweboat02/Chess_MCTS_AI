@@ -44,12 +44,23 @@ class FOWChess:
     def __init__(self):
         self._white = 0
         self._black = 0
-        self._kings = 0
-        self._queens = 0
         self._pawns = 0
-        self._rooks = 0
-        self._bishops = 0
         self._knights = 0
+        self._bishops = 0
+        self._rooks = 0
+        self._queens = 0
+        self._kings = 0
+        self.reset_board()
+
+    def reset_board(self) -> None:
+        self._white = BB_rank(1)|BB_rank(2)
+        self._black = BB_rank(7)|BB_rank(8)
+        self._pawns = BB_rank(7)|BB_rank(2)
+        self._bishops = BB_square(3)|BB_square(6)|BB_square(58)|BB_square(62)
+        self._knights = BB_square(2)|BB_square(7)|BB_square(57)|BB_square(63)
+        self._rook = BB_square(1)|BB_square(8)|BB_square(56)|BB_square(64)
+        self._queens = BB_square(4)|BB_square(60)
+        self._kings = BB_square(5)|BB_square(61)
 
     def __hash__(self):
         return (self._white,
