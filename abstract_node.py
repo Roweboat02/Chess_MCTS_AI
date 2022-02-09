@@ -1,22 +1,24 @@
+import random
 from copy import deepcopy
-from collections import deque
 from math import log, sqrt
+from abc import ABC, abstractmethod
 
-class Node:
+class Node(ABC):
     """
     Tree node containg a game state, connected nodes are immediately reachable
     game states.
     """
-    def __init__(self, parent, move=None):
+    def __init__(self, parent, depth, move=None):
         self.game = deepcopy(parent)
         self.move = move
         if move is not None:
             self.game.make_move(move)
+        self.depth = depth
 
         self.visited = False
 
         self.children = None
-        self._unvisited_index = None
+        self._unvisited_list = None
 
         #Node stats for UCB calculation
         self.visits = 0
@@ -25,20 +27,21 @@ class Node:
     def populate(self):
         self.visited = True
         self.children = [Node(self.game, move) for move in self.game.possible_moves()]
-        self._unvisited_index = len(self.children)
+        self._unvisited_list = self.children.copy()
 
     @property
-    def winner(self):
+    @abstractmethod
+    def is_terminal(self):
         return self.game.winner
 
+    @abstractmethod
     def increase_or_decrease(self, outcome):
         return 1 if ('X','O')[self.game.turn] == outcome else -1
 
     @property
     def child(self):
-        if self._unvisited_index > 0:
-            self._unvisited_index-=1
-            return self.children[self._unvisited_index]
+        if self._unvisited_list:
+            return self._unvisited_list.pop(random.randint(0, len(self._unvisited_list)))
         else:
             return self.ucb()
 
@@ -67,7 +70,6 @@ class Node:
         if outcome == 'TIE':
             return
         else:
-            a = self.increase_or_decrease(outcome) * (1+(6/proximity**2))
             self.score += self.increase_or_decrease(outcome) * (1+(6/proximity**2))
             return
 

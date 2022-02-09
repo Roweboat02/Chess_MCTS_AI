@@ -5,7 +5,7 @@ import numpy as np
 
 
 def bitboard_to_numpy(bb):
-    s = 8 * np.arange(7, -1, -1, dtype=np.uint64)
+    s = 8 * np.arange(7, -1, -1, dtype=np.uint8)
     return np.unpackbits((bb >> s).astype(np.uint8), bitorder="little").reshape(8, 8)
 
 
@@ -52,16 +52,8 @@ class FOWChess:
 
     # _SQUARES_MIRRORED_LR = [sq ^ 0x07 for sq in chess.SQUARES]
 
-    def __init__(self, chess_game=None, color=None):
+    def __init__(self, chess_game=None):
         self.board = chess.Board() if chess_game is None else chess_game
-        # self._color = color
-
-    # def swap_color(self):
-    #     self._color = not self._color
-    #
-    # @property
-    # def color(self):
-    #     return self._color if self._color is not None else self.board.turn
 
     @cached_property
     def moves(self):
@@ -104,7 +96,7 @@ class FOWChess:
         # Convert the int64 (bit-board) mask to a 8x8 numpy mask array
 
         return np.dstack((
-                np.flip(bitboard_to_numpy(self._visable_squares(False)), (0)),
+                np.flip(bitboard_to_numpy(self._visable_squares(False)), 0),
                 bitboard_to_numpy(self._visable_squares(True)),
                  ))
 
