@@ -54,7 +54,7 @@ class Node:
         ucb_values = [_child.score / _child.visits + c_const * sqrt( log(self.visits) / _child.visits) for _child in self.children]
         if _print:
             print(ucb_values)
-        return children[ucb_values.index(max(ucb_values))]
+        return self.children[ucb_values.index(max(ucb_values))]
 
     def update_score(self, outcome, proximity):
         """

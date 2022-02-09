@@ -1,5 +1,7 @@
 from tree import Node
 
+class MCTS:
+
 def mcts(node, depth=0):
     depth+=1
     if node.winner is not None:

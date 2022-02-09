@@ -50,7 +50,7 @@ class FOWChess:
         "k": -6,  # Black King
     }
 
-    _SQUARES_MIRRORED_LR = [sq ^ 0x07 for sq in chess.SQUARES]
+    # _SQUARES_MIRRORED_LR = [sq ^ 0x07 for sq in chess.SQUARES]
 
     def __init__(self, chess_game=None, color=None):
         self.board = chess.Board() if chess_game is None else chess_game
