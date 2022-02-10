@@ -74,6 +74,11 @@ class FOWChess:
                 )
 
     @property
+    def is_over(self): pass
+
+    def make_random_move(self) -> None: pass
+
+    @property
     def _occupied_squares(self) -> int:
         return self._white & self._black
 

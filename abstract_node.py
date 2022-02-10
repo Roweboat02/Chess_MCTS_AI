@@ -1,15 +1,18 @@
+from __future__ import annotations
+
 import random
 from copy import deepcopy
 from math import log, sqrt
 from abc import ABC, abstractmethod
+import fog_of_war_chess as fow
 
-class Node(ABC):
+class AbstractNode(ABC):
     """
     Tree node containg a game state, connected nodes are immediately reachable
     game states.
     """
-    def __init__(self, parent, depth, move=None):
-        self.game = deepcopy(parent)
+    def __init__(self, game:fow.FOWChess, depth:int, move:str=None) -> None:
+        self.game = deepcopy(game)
         self.move = move
         if move is not None:
             self.game.make_move(move)
@@ -24,30 +27,26 @@ class Node(ABC):
         self.visits = 0
         self.score = 0
 
-    def populate(self):
+    def populate(self) -> None:
         self.visited = True
-        self.children = [Node(self.game, move) for move in self.game.possible_moves()]
+        self.children = [AbstractNode(self.game, move) for move in self.game.possible_moves()]
         self._unvisited_list = self.children.copy()
 
     @property
     @abstractmethod
     def is_terminal(self):
-        return self.game.winner
-
-    @abstractmethod
-    def increase_or_decrease(self, outcome):
-        return 1 if ('X','O')[self.game.turn] == outcome else -1
+        return self.game.is_over
 
     @property
-    def child(self):
+    def child(self) -> AbstractNode:
         if self._unvisited_list:
             return self._unvisited_list.pop(random.randint(0, len(self._unvisited_list)))
         else:
             return self.ucb()
 
-    def ucb(self, c_const=1.41, _print=False):
+    def ucb(self, c_const:float=1.41, _print:bool=False) -> AbstractNode:
         """
-        Find child in children list with greatest upper confidence bound.
+        Find child in children list with the greatest upper confidence bound.
         UCB given by UCB(v,vi) = Q(vi)/N(vi) + c*[ln(N(v))/N(vi)]^1/2
         Where v is current node, vi is child,
         c is an exploitation constant,
@@ -59,21 +58,16 @@ class Node(ABC):
             print(ucb_values)
         return self.children[ucb_values.index(max(ucb_values))]
 
-    def update_score(self, outcome, proximity):
+    def update_score(self, score_change:int) -> None:
         """
         Backpropogate outcome up path.
         If outcome matches the turn, increase. Else decrease.
         """
         #Each node is visited if it's on the back propogation trail.
         self.visits += 1
+        self.score += score_change
 
-        if outcome == 'TIE':
-            return
-        else:
-            self.score += self.increase_or_decrease(outcome) * (1+(6/proximity**2))
-            return
-
-    def rollout(self, depth):
+    def rollout(self, depth:int):
         """
         Make random moves until terminal state is found.
         Returns
@@ -82,7 +76,7 @@ class Node(ABC):
             outcome is item from self.game.SYMBOLS representing winner.
         """
         game = deepcopy(self.game)
-        while game.winner is None:
+        while self.is_terminal is False:
             depth+=1
             game.make_random_move()
 
