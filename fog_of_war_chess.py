@@ -50,9 +50,9 @@ class FOWChess:
         self._rooks = 0
         self._queens = 0
         self._kings = 0
-        self.reset_board()
+        self._reset_board()
 
-    def reset_board(self) -> None:
+    def _reset_board(self) -> None:
         self._white = BB_rank(1)|BB_rank(2)
         self._black = BB_rank(7)|BB_rank(8)
         self._pawns = BB_rank(7)|BB_rank(2)
@@ -74,11 +74,19 @@ class FOWChess:
                 )
 
     @property
-    def occupied_squares(self) -> int:
+    def _occupied_squares(self) -> int:
         return self._white & self._black
 
-    def occupied_by_color(self, color:bool) -> int:
+    def _occupied_by_color(self, color:bool) -> int:
         return self._white if color else self._black
+
+    @property
+    def black_board(self) -> np.ndarray:
+        return np.flip(self.board_to_numpy(), 0) * -1
+
+    @property
+    def white_board(self) -> np.ndarray:
+        return self.board_to_numpy()
 
     @property
     def black_fog(self) -> np.ndarray:
@@ -87,6 +95,17 @@ class FOWChess:
     @property
     def white_fog(self) -> np.ndarray:
         return self.bb_to_numpy(self._visable_squares(True))
+
+    @property
+    def white_foggy_board(self) -> np.ndarray:
+        return self.apply_fog(self.white_board, self.white_fog)
+
+    @property
+    def black_foggy_board(self) -> np.ndarray:
+        return self.apply_fog(self.black_board, self.black_fog)
+
+    def apply_fog(self, board:np.ndarray, fog:np.ndarray) -> np.ndarray:
+        return np.clip(board + np.logical_not(fog.copy())*100, -16, 15)
 
     def make_move(self, move): pass
 
@@ -109,7 +128,7 @@ class FOWChess:
 
 
     def bb_to_numpy(self, bb: int) -> np.ndarray:
-        return np.unpackbits((bb>>np.arange(0, 57, 8)).astype(np.uint8), bitorder="little").reshape(8, 8)
+        return np.unpackbits((bb>>np.arange(0, 57, 8)).astype(np.uint8), bitorder="little").reshape(8, 8).astype(np.int16)
 
     def possible_moves(self): pass
 
@@ -125,7 +144,7 @@ class FOWChess:
         """
         visable = 0
 
-        our_pieces = self.occupied_by_color(color)
+        our_pieces = self._occupied_by_color(color)
         visable |= our_pieces
 
         # Generate non-pawn moves.
@@ -140,27 +159,27 @@ class FOWChess:
         if pawns:
             # First if they can attack anyone
             pawn_attacks = reduce_with_bitwise_or(
-                chess.BB_PAWN_ATTACKS[color][frm] & self.occupied_by_color(not color)
+                chess.BB_PAWN_ATTACKS[color][frm] & self._occupied_by_color(not color)
                 for frm in reverse_scan_for_peice(pawns)
             )
             visable |= pawn_attacks
 
             # Then find their single and double moves
             if color == self.WHITE:
-                single_moves = pawns << 8 & ~self.occupied_squares
+                single_moves = pawns << 8 & ~self._occupied_squares
                 double_moves = (
-                    single_moves << 8 & (BB_rank(3) | BB_rank(4)) & ~self.occupied_squares
+                    single_moves << 8 & (BB_rank(3) | BB_rank(4)) & ~self._occupied_squares
                 )
             else:
-                single_moves = pawns >> 8 & ~self.occupied_squares
+                single_moves = pawns >> 8 & ~self._occupied_squares
                 double_moves = (
-                    single_moves >> 8 & (BB_rank(6) | BB_rank(5)) & ~self.occupied_squares
+                    single_moves >> 8 & (BB_rank(6) | BB_rank(5)) & ~self._occupied_squares
                 )
             visable |= single_moves | double_moves
 
             # Finally, check if an en passant is available
             if (self.board.ep_square and not
-                BB_square(self.board.ep_square) & self.occupied_squares):
+                BB_square(self.board.ep_square) & self._occupied_squares):
                 en_passant = self.board.ep_square
                 visable |= en_passant
 
