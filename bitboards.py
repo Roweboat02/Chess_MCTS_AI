@@ -70,9 +70,9 @@ def diagonal_attacks(square:Square)->int: pass # TODO: implement
 def attack_masks(square: Square, piece:Piece)->int:
     return {
             # Literally made these up as I done them. There's actual lists on chess programming wiki.
-            # TODO: need to check if peices wrap around board
-            Piece.p: lambda sq: sq - 7 | sq - 9,
-            Piece.P: lambda sq: sq + 7 | sq + 9,
+            # TODO: need to add check if peices wrap around board
+            Piece.p: lambda sq: BB_square(sq - 7) | BB_square(sq - 9),
+            Piece.P: lambda sq: BB_square(sq + 7) | BB_square(sq + 9),
 
             Piece.k: lambda sq: reduce_with_bitwise_or(map(lambda i: BB_square(i+sq), (-7, -8, -9, -1, 1, 7, 8, 9))),
             Piece.K: lambda sq: reduce_with_bitwise_or(map(lambda i: BB_square(i+sq), (-7, -8, -9, -1, 1, 7, 8, 9))),

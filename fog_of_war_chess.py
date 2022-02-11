@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+from typing import List
+
 import numpy as np
 
 import bitboards as bb
 from bitboards import Bitboards
+from move import Move
 from piece import Piece
 from square import Square
 
@@ -34,7 +37,16 @@ class FOWChess:
         """True if 1 king left on board"""
         return sum(bb.reverse_scan_for_peice(self._bitboards.kings)) == 1
 
-    def make_move(self, move) -> FOWChess: pass #TODO: implement
+    @property
+    def winner(self)-> bool | None:
+        w:int = self._bitboards.white & self._bitboards.kings
+        b:int = self._bitboards.black & self._bitboards.kings
+        if w==b:
+            return None
+        elif w==0:
+            return self.BLACK
+        elif b==0:
+            return self.WHITE
 
     def _remove_peice_at(self, square:Square, peice:Piece): pass #TODO: implement
 
@@ -42,7 +54,6 @@ class FOWChess:
 
     def piece_at(self, square: Square)-> Piece: pass #TODO: implement
 
-    def make_random_move(self) -> FOWChess: pass #TODO: implement
 
     @property
     def _occupied_squares(self) -> int:
@@ -92,9 +103,13 @@ class FOWChess:
                 + bb.bb_to_numpy(self._bitboards.white)
         )
 
-    def possible_moves(self): pass
+    def possible_moves(self)-> List[Move]: pass
 
-    def _visable_squares(self, color: bool) -> int:
+    def make_move(self, Move)-> FOWChess: pass
+
+    def make_random_move(self)-> FOWChess: pass
+
+    def _visable_squares(self, color: bool)-> int:
         """
         Run through each piece type's move patterns to find all possible moves.
 
