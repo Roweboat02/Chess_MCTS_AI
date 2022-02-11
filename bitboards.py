@@ -1,13 +1,12 @@
 import collections
 from collections.abc import Iterator, Iterable
 from functools import reduce
-from typing import List, Tuple
+from typing import Tuple
 
 import numpy as np
 
 import move as mv
-from piece import Piece
-from square import Square
+import piece as pce
 import square as sq
 
 Bitboards = collections.namedtuple("Bitboards",
@@ -16,9 +15,12 @@ Bitboards = collections.namedtuple("Bitboards",
 def make_move(bitboards:Bitboards, move:mv.Move)->Bitboards:
     return place_piece_at(*remove_piece_at(bitboards, move.frm), move.to)
 
-def place_piece_at(bitboards:Bitboards, piece:Piece, square:Square)->Bitboards: pass #TODO: implement
+def place_piece_at(bitboards:Bitboards, piece:pce.Piece, square:sq.Square)->Bitboards: pass #TODO: implement
 
-def remove_piece_at(bitboards:Bitboards, square:Square)->Tuple[Bitboards, Piece]: pass #TODO: implement
+def remove_piece_at(bitboards:Bitboards, square:sq.Square)->Tuple[Bitboards, pce.Piece]: pass #TODO: implement
+
+def piece_at(square: sq.Square)-> pce.Piece: pass #TODO: implement
+
 
 def BB_rank(num:int) -> int:
     return 0b11111111 << (num-1)*8
@@ -52,7 +54,7 @@ def bb_to_numpy(bb: int)->np.ndarray:
     return np.unpackbits((bb>>np.arange(0, 57, 8)).astype(np.uint8), bitorder="little").reshape(8, 8).astype(np.int16)
 
 
-def sliding_attacks(square:Square, deltas:Iterable[int])->int:  # Prob split off the max(...) into it's own function at some point
+def sliding_attacks(square:sq.Square, deltas:Iterable[int])->int:  # Prob split off the max(...) into it's own function at some point
     return reduce_with_bitwise_or(square+delta
                                   for delta in deltas
                                   if not (0<square+delta<=64)
@@ -60,40 +62,40 @@ def sliding_attacks(square:Square, deltas:Iterable[int])->int:  # Prob split off
                                             abs(sq.file_of_square(square)-sq.file_of_square(square+delta))))
 
 
-def pawn_attacks(square:Square, color:bool)->int:
+def pawn_attacks(square:sq.Square, color:bool)->int:
     return sliding_attacks(square, ((-7,-9),(7,9))[color])
 
 
-def rank_attacks(square:Square)->int:
+def rank_attacks(square:sq.Square)->int:
     return BB_rank(sq.rank_of_square(square))
 
 
-def file_attacks(square:Square)->int:
+def file_attacks(square:sq.Square)->int:
     return BB_file(sq.file_of_square(square))
 
 
-def diagonal_attacks(square:Square)->int: pass # TODO: implement
+def diagonal_attacks(square:sq.Square)->int: pass # TODO: implement
 
 
-def attack_masks(square: Square, piece:Piece)->int:
+def attack_masks(square: sq.Square, piece:pce.Piece)->int:
     return {
             # Literally made these up as I done them. There's actual lists on chess programming wiki.
             # TODO: need to add check if peices wrap around board
-            Piece.p: lambda sq: BB_square(sq - 7) | BB_square(sq - 9),
-            Piece.P: lambda sq: BB_square(sq + 7) | BB_square(sq + 9),
+            pce.Piece.p: lambda sq: BB_square(sq - 7) | BB_square(sq - 9),
+            pce.Piece.P: lambda sq: BB_square(sq + 7) | BB_square(sq + 9),
 
-            Piece.k: lambda sq: reduce_with_bitwise_or(map(lambda i: BB_square(i+sq), (-7, -8, -9, -1, 1, 7, 8, 9))),
-            Piece.K: lambda sq: reduce_with_bitwise_or(map(lambda i: BB_square(i+sq), (-7, -8, -9, -1, 1, 7, 8, 9))),
+            pce.Piece.k: lambda sq: reduce_with_bitwise_or(map(lambda i: BB_square(i+sq), (-7, -8, -9, -1, 1, 7, 8, 9))),
+            pce.Piece.K: lambda sq: reduce_with_bitwise_or(map(lambda i: BB_square(i+sq), (-7, -8, -9, -1, 1, 7, 8, 9))),
 
-            Piece.N: lambda sq: reduce_with_bitwise_or(map(lambda i: BB_square(i+sq), (6, -6, 15, -15, 17, -17, 10, -10))),
-            Piece.n: lambda sq: reduce_with_bitwise_or(map(lambda i: BB_square(i+sq), (6, -6, 15, -15, 17, -17, 10, -10))),
+            pce.Piece.N: lambda sq: reduce_with_bitwise_or(map(lambda i: BB_square(i+sq), (6, -6, 15, -15, 17, -17, 10, -10))),
+            pce.Piece.n: lambda sq: reduce_with_bitwise_or(map(lambda i: BB_square(i+sq), (6, -6, 15, -15, 17, -17, 10, -10))),
 
-            Piece.Q: lambda sq: rank_attacks(sq) | file_attacks(sq) | diagonal_attacks(sq),
-            Piece.q: lambda sq: rank_attacks(sq) | file_attacks(sq) | diagonal_attacks(sq),
+            pce.Piece.Q: lambda sq: rank_attacks(sq) | file_attacks(sq) | diagonal_attacks(sq),
+            pce.Piece.q: lambda sq: rank_attacks(sq) | file_attacks(sq) | diagonal_attacks(sq),
 
-            Piece.R: lambda sq: rank_attacks(sq) | file_attacks(sq),
-            Piece.r: lambda sq: rank_attacks(sq) | file_attacks(sq),
+            pce.Piece.R: lambda sq: rank_attacks(sq) | file_attacks(sq),
+            pce.Piece.r: lambda sq: rank_attacks(sq) | file_attacks(sq),
 
-            Piece.B: lambda sq: diagonal_attacks(sq),
-            Piece.b: lambda sq: diagonal_attacks(sq),
+            pce.Piece.B: lambda sq: diagonal_attacks(sq),
+            pce.Piece.b: lambda sq: diagonal_attacks(sq),
     }[piece](square)

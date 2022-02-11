@@ -5,22 +5,20 @@ from typing import List
 import numpy as np
 
 import bitboards as bb
-from bitboards import Bitboards
-from move import Move
-from piece import Piece
-from square import Square
+import move as mv
+import piece as pce
 
 
 class FOWChess:
     WHITE = True
     BLACK = False
 
-    def __init__(self, bitboards:Bitboards):
+    def __init__(self, bitboards:bb.Bitboards) -> None:
         self._bitboards = bitboards
 
     @classmethod
-    def new_game(cls)-> FOWChess:
-        a = cls(Bitboards(0, 0, 0, 0, 0, 0, 0, 0))
+    def new_game(cls) -> FOWChess:
+        a = cls(bb.Bitboards(0, 0, 0, 0, 0, 0, 0, 0))
         a._reset_board()
         return a
 
@@ -34,7 +32,7 @@ class FOWChess:
         self._bitboards.queens = bb.BB_square(4) | bb.BB_square(60)
         self._bitboards.kings = bb.BB_square(5) | bb.BB_square(61)
 
-    def __hash__(self):
+    def __hash__(self) -> bb.Bitboards:
         return self._bitboards
 
     @property
@@ -52,13 +50,6 @@ class FOWChess:
             return self.BLACK
         elif b==0:
             return self.WHITE
-
-    def _remove_peice_at(self, square:Square, peice:Piece): pass #TODO: implement
-
-    def _put_piece_at(self, square:Square, peice:Piece): pass #TODO: implement
-
-    def piece_at(self, square: Square)-> Piece: pass #TODO: implement
-
 
     @property
     def _occupied_squares(self) -> int:
@@ -97,18 +88,18 @@ class FOWChess:
 
     def board_to_numpy(self) -> np.ndarray:
         return (
-                bb.bb_to_numpy(self._bitboards.kings)*Piece['K'].value
-                + bb.bb_to_numpy(self._bitboards.queens)*Piece['Q'].value
-                + bb.bb_to_numpy(self._bitboards.pawns)*Piece['P'].value
-                + bb.bb_to_numpy(self._bitboards.rooks)*Piece['R'].value
-                + bb.bb_to_numpy(self._bitboards.bishops)*Piece['B'].value
-                + bb.bb_to_numpy(self._bitboards.knights)*Piece['N'].value
+                bb.bb_to_numpy(self._bitboards.kings)*pce.Piece['K'].value
+                + bb.bb_to_numpy(self._bitboards.queens)*pce.Piece['Q'].value
+                + bb.bb_to_numpy(self._bitboards.pawns)*pce.Piece['P'].value
+                + bb.bb_to_numpy(self._bitboards.rooks)*pce.Piece['R'].value
+                + bb.bb_to_numpy(self._bitboards.bishops)*pce.Piece['B'].value
+                + bb.bb_to_numpy(self._bitboards.knights)*pce.Piece['N'].value
                ) * (
                 bb.bb_to_numpy(self._bitboards.black)*-1
                 + bb.bb_to_numpy(self._bitboards.white)
         )
 
-    def possible_moves(self)-> List[Move]: pass #TODO: implement
+    def possible_moves(self)-> List[mv.Move]: pass #TODO: implement
 
     def make_move(self, Move)-> FOWChess: pass  #TODO: implement
 
@@ -117,12 +108,6 @@ class FOWChess:
     def _visable_squares(self, color: bool)-> int:
         """
         Run through each piece type's move patterns to find all possible moves.
-
-        Returns
-        -------
-        destinations : List
-            DESCRIPTION.
-
         """
         visable = 0
 
@@ -131,7 +116,7 @@ class FOWChess:
 
         # Generate non-pawn moves.
         piece_moves = bb.reduce_with_bitwise_or(
-            bb.attack_masks(frm, self.piece_at(frm))
+            bb.attack_masks(frm, bb.piece_at(frm))
             for frm in (bb.reverse_scan_for_peice(our_pieces & ~self._bitboards.pawns))
         )
         visable |= piece_moves
