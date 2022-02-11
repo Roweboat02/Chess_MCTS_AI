@@ -5,7 +5,6 @@ from functools import reduce
 
 import numpy as np
 
-import bitboards
 import bitboards as bb
 from bitboards import Bitboards
 from piece import Piece
@@ -38,7 +37,7 @@ class FOWChess:
         """True if 1 king left on board"""
         return sum(bb.reverse_scan_for_peice(self._bitboards.kings)) == 1
 
-    def make_move(self, move) -> FOWChess: pass
+    def make_move(self, move) -> FOWChess: pass #TODO: implement
 
     def _remove_peice_at(self, square:Square, peice:Piece): pass #TODO: implement
 
@@ -146,7 +145,7 @@ class FOWChess:
             # Finally, check if an en passant is available
             if (self.board.ep_square and not
                 bb.BB_square(self.board.ep_square) & self._occupied_squares):
-                en_passant = self.board.ep_square
+                en_passant = self.board.ep_square #TODO: no idea how to do ep squares
                 visable |= en_passant
 
         return visable
