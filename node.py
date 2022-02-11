@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import random
-from typing import List, Dict
+from typing import List
 
 import fog_of_war_chess as fow
 import move as mv

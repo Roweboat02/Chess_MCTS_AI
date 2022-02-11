@@ -15,9 +15,14 @@ class FOWChess:
     WHITE = True
     BLACK = False
 
-    def __init__(self):
-        self._bitboards = Bitboards(0, 0, 0, 0, 0, 0, 0, 0)
-        self._reset_board()
+    def __init__(self, bitboards:Bitboards):
+        self._bitboards = bitboards
+
+    @classmethod
+    def new_game(cls)-> FOWChess:
+        a = cls(Bitboards(0, 0, 0, 0, 0, 0, 0, 0))
+        a._reset_board()
+        return a
 
     def _reset_board(self) -> None:
         self._bitboards.white = bb.BB_rank(1) | bb.BB_rank(2)
@@ -103,11 +108,11 @@ class FOWChess:
                 + bb.bb_to_numpy(self._bitboards.white)
         )
 
-    def possible_moves(self)-> List[Move]: pass
+    def possible_moves(self)-> List[Move]: pass #TODO: implement
 
-    def make_move(self, Move)-> FOWChess: pass
+    def make_move(self, Move)-> FOWChess: pass  #TODO: implement
 
-    def make_random_move(self)-> FOWChess: pass
+    def make_random_move(self)-> FOWChess: pass  #TODO: implement
 
     def _visable_squares(self, color: bool)-> int:
         """

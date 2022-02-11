@@ -17,6 +17,9 @@ class AbstractTreeSearch(ABC):
     @abstractmethod
     def update_node_score(self, node:Node, result:int) -> None: pass
 
+    def populate_node(self, node:Node):
+        node.populate()
+
     def ucb(self, node:Node, c_const:float=1.41,) -> Node:
         """
         Find child in children list with the greatest upper confidence bound.
@@ -52,7 +55,7 @@ class AbstractTreeSearch(ABC):
             result:int = self.terminal_state_value(node.game, depth)
 
         elif not node.visited:
-            node.populate()
+            self.populate_node(node)
             result:int = self.rollout(node, depth)
 
         else:

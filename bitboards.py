@@ -1,16 +1,24 @@
 import collections
 from collections.abc import Iterator, Iterable
 from functools import reduce
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 
+import move as mv
 from piece import Piece
 from square import Square
 import square as sq
 
 Bitboards = collections.namedtuple("Bitboards",
                                    ["white", "black", "pawns", "knights", "bishops", "rooks", "queens", "kings"])
+
+def make_move(bitboards:Bitboards, move:mv.Move)->Bitboards:
+    return place_piece_at(*remove_piece_at(bitboards, move.frm), move.to)
+
+def place_piece_at(bitboards:Bitboards, piece:Piece, square:Square)->Bitboards: pass #TODO: implement
+
+def remove_piece_at(bitboards:Bitboards, square:Square)->Tuple[Bitboards, Piece]: pass #TODO: implement
 
 def BB_rank(num:int) -> int:
     return 0b11111111 << (num-1)*8
