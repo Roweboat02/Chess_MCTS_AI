@@ -3,10 +3,9 @@ from __future__ import annotations
 import random
 from copy import deepcopy
 from math import log, sqrt
-from abc import ABC, abstractmethod
 import fog_of_war_chess as fow
 
-class AbstractNode(ABC):
+class Node:
     """
     Tree node containg a game state, connected nodes are immediately reachable
     game states.
@@ -20,6 +19,8 @@ class AbstractNode(ABC):
 
         self.visited = False
 
+        self.is_terminal = False
+
         self.children = None
         self._unvisited_list = None
 
@@ -29,22 +30,18 @@ class AbstractNode(ABC):
 
     def populate(self) -> None:
         self.visited = True
-        self.children = [AbstractNode(self.game, move) for move in self.game.possible_moves()]
+        self.children = [Node(self.game, move) for move in self.game.possible_moves()]
         self._unvisited_list = self.children.copy()
 
-    @property
-    @abstractmethod
-    def is_terminal(self):
-        return self.game.is_over
 
     @property
-    def child(self) -> AbstractNode:
+    def child(self) -> Node:
         if self._unvisited_list:
             return self._unvisited_list.pop(random.randint(0, len(self._unvisited_list)))
         else:
             return self.ucb()
 
-    def ucb(self, c_const:float=1.41, _print:bool=False) -> AbstractNode:
+    def ucb(self, c_const:float=1.41, _print:bool=False) -> Node:
         """
         Find child in children list with the greatest upper confidence bound.
         UCB given by UCB(v,vi) = Q(vi)/N(vi) + c*[ln(N(v))/N(vi)]^1/2
