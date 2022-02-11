@@ -4,15 +4,6 @@ import chess
 import numpy as np
 
 
-def bitboard_to_numpy(bb):
-    s = 8 * np.arange(7, -1, -1, dtype=np.uint8)
-    return np.unpackbits((bb >> s).astype(np.uint8), bitorder="little").reshape(8, 8)
-
-
-def reduce_with_bitwise_or(iterable):
-    return reduce(lambda x, y: x | y, iterable)
-
-
 class FOWChess:
     """
     Implements a fog of war (FOW) chess game.
