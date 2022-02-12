@@ -2,6 +2,7 @@ import collections
 from collections.abc import Iterator, Iterable
 from functools import reduce
 from typing import Tuple
+from abc import ABC
 
 import numpy as np
 
@@ -9,18 +10,12 @@ import move as mv
 import piece as pce
 import square as sq
 
-Bitboards = collections.namedtuple("Bitboards",
-                                   ["white", "black", "pawns", "knights", "bishops", "rooks", "queens", "kings"])
 
-def make_move(bitboards:Bitboards, move:mv.Move)->Bitboards:
-    return place_piece_at(*remove_piece_at(bitboards, move.frm), move.to)
+ColorBitboards = collections.namedtuple("ColorBitboards",
+                                        ["white", "black"])
 
-def place_piece_at(bitboards:Bitboards, piece:pce.Piece, square:sq.Square)->Bitboards: pass #TODO: implement
-
-def remove_piece_at(bitboards:Bitboards, square:sq.Square)->Tuple[Bitboards, pce.Piece]: pass #TODO: implement
-
-def piece_at(square: sq.Square)-> pce.Piece: pass #TODO: implement
-
+PieceBitboards = collections.namedtuple("PieceBitboards",
+                                        ["pawns", "knights", "bishops", "rooks", "queens", "kings"])
 
 def BB_rank(num:int) -> int:
     return 0b11111111 << (num-1)*8
@@ -33,6 +28,16 @@ def BB_file(num:int) -> int:
 def BB_square(num:int) -> int:
     return 1<<(num-1)
 
+def make_move(bitboards:PieceBitboards, move:mv.Move) -> PieceBitboards:
+    return place_piece_at(*remove_piece_at(bitboards, move.frm), move.to)
+
+def place_piece_at(bitboards:PieceBitboards, piece:pce.Piece, square:sq.Square) -> PieceBitboards: pass #TODO: implement
+
+def remove_piece_at(bitboards:PieceBitboards, square:sq.Square)->Tuple[PieceBitboards, pce.Piece]:
+    return filter(lambda bb_name: bb&BB_square(square), )
+
+def piece_at(square: sq.Square)-> pce.Piece: pass #TODO: implement
+
 
 def bitboard_to_numpy(bb):
     s = 8 * np.arange(7, -1, -1, dtype=np.uint8)
@@ -43,7 +48,7 @@ def reduce_with_bitwise_or(iterable:Iterable[int]) -> int:
     return reduce(lambda x, y: x | y, iterable)
 
 
-def reverse_scan_for_peice(bitboard:int) -> Iterator[int]:
+def reverse_scan_for_piece(bitboard:int) -> Iterator[int]:
     while bitboard:
         length = bitboard.bit_length()-1
         yield length

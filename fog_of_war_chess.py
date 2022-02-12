@@ -13,12 +13,12 @@ class FOWChess:
     WHITE = True
     BLACK = False
 
-    def __init__(self, bitboards:bb.Bitboards) -> None:
+    def __init__(self, bitboards:bb.PieceBitboards) -> None:
         self._bitboards = bitboards
 
     @classmethod
     def new_game(cls) -> FOWChess:
-        a = cls(bb.Bitboards(0, 0, 0, 0, 0, 0, 0, 0))
+        a = cls(bb.PieceBitboards(0, 0, 0, 0, 0, 0, 0, 0))
         a._reset_board()
         return a
 
@@ -32,13 +32,13 @@ class FOWChess:
         self._bitboards.queens = bb.BB_square(4) | bb.BB_square(60)
         self._bitboards.kings = bb.BB_square(5) | bb.BB_square(61)
 
-    def __hash__(self) -> bb.Bitboards:
+    def __hash__(self) -> bb.PieceBitboards:
         return self._bitboards
 
     @property
     def is_over(self) -> bool:
         """True if 1 king left on board"""
-        return sum(bb.reverse_scan_for_peice(self._bitboards.kings)) == 1
+        return sum(bb.reverse_scan_for_piece(self._bitboards.kings)) == 1
 
     @property
     def winner(self)-> bool | None:
@@ -117,7 +117,7 @@ class FOWChess:
         # Generate non-pawn moves.
         piece_moves = bb.reduce_with_bitwise_or(
             bb.attack_masks(frm, bb.piece_at(frm))
-            for frm in (bb.reverse_scan_for_peice(our_pieces & ~self._bitboards.pawns))
+            for frm in (bb.reverse_scan_for_piece(our_pieces & ~self._bitboards.pawns))
         )
         visable |= piece_moves
 
@@ -127,7 +127,7 @@ class FOWChess:
             # First if they can attack anyone
             pawn_attacks = bb.reduce_with_bitwise_or(
                     bb.pawn_attacks(frm, color) & self._occupied_by_color(not color)
-                for frm in bb.reverse_scan_for_peice(pawns)
+                for frm in bb.reverse_scan_for_piece(pawns)
             )
             visable |= pawn_attacks
 
