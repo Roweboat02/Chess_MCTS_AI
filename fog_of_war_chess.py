@@ -23,14 +23,7 @@ class FOWChess:
         return a
 
     def _reset_board(self) -> None:
-        self._bitboards.white = bb.BB_rank(1) | bb.BB_rank(2)
-        self._bitboards.black = bb.BB_rank(7) | bb.BB_rank(8)
-        self._bitboards.pawns = bb.BB_rank(7) | bb.BB_rank(2)
-        self._bitboards.bishops = bb.BB_square(3) | bb.BB_square(6) | bb.BB_square(58) | bb.BB_square(62)
-        self._bitboards.knights = bb.BB_square(2) | bb.BB_square(7) | bb.BB_square(57) | bb.BB_square(63)
-        self._bitboards.rook = bb.BB_square(1) | bb.BB_square(8) | bb.BB_square(56) | bb.BB_square(64)
-        self._bitboards.queens = bb.BB_square(4) | bb.BB_square(60)
-        self._bitboards.kings = bb.BB_square(5) | bb.BB_square(61)
+        self._bitboards = bb.NewGameBitboards()
 
     def __hash__(self) -> bb.PieceBitboards:
         return self._bitboards
@@ -68,11 +61,11 @@ class FOWChess:
 
     @property
     def black_fog(self) -> np.ndarray:
-        return np.flip(bb.bb_to_numpy(self._visable_squares(False)), 0)
+        return np.flip(bb.bitboard_to_numpy(self._visable_squares(False)), 0)
 
     @property
     def white_fog(self) -> np.ndarray:
-        return bb.bb_to_numpy(self._visable_squares(True))
+        return bb.bitboard_to_numpy(self._visable_squares(True))
 
     @property
     def white_foggy_board(self) -> np.ndarray:
@@ -88,15 +81,15 @@ class FOWChess:
 
     def board_to_numpy(self) -> np.ndarray:
         return (
-                bb.bb_to_numpy(self._bitboards.kings)*pce.Piece['K'].value
-                + bb.bb_to_numpy(self._bitboards.queens)*pce.Piece['Q'].value
-                + bb.bb_to_numpy(self._bitboards.pawns)*pce.Piece['P'].value
-                + bb.bb_to_numpy(self._bitboards.rooks)*pce.Piece['R'].value
-                + bb.bb_to_numpy(self._bitboards.bishops)*pce.Piece['B'].value
-                + bb.bb_to_numpy(self._bitboards.knights)*pce.Piece['N'].value
+                       bb.bitboard_to_numpy(self._bitboards.kings) * pce.Piece['K'].value
+                       + bb.bitboard_to_numpy(self._bitboards.queens) * pce.Piece['Q'].value
+                       + bb.bitboard_to_numpy(self._bitboards.pawns) * pce.Piece['P'].value
+                       + bb.bitboard_to_numpy(self._bitboards.rooks) * pce.Piece['R'].value
+                       + bb.bitboard_to_numpy(self._bitboards.bishops) * pce.Piece['B'].value
+                       + bb.bitboard_to_numpy(self._bitboards.knights) * pce.Piece['N'].value
                ) * (
-                bb.bb_to_numpy(self._bitboards.black)*-1
-                + bb.bb_to_numpy(self._bitboards.white)
+                       bb.bitboard_to_numpy(self._bitboards.black) * -1
+                       + bb.bitboard_to_numpy(self._bitboards.white)
         )
 
     def possible_moves(self)-> List[mv.Move]: pass #TODO: implement
@@ -116,7 +109,7 @@ class FOWChess:
 
         # Generate non-pawn moves.
         piece_moves = bb.reduce_with_bitwise_or(
-            bb.attack_masks(frm, bb.piece_at(frm))
+            bb.attack_masks(frm, bb.place_at(frm))
             for frm in (bb.reverse_scan_for_piece(our_pieces & ~self._bitboards.pawns))
         )
         visable |= piece_moves
