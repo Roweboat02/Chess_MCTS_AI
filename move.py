@@ -8,7 +8,7 @@ import piece as pce
 Move = collections.namedtuple("Move",
                               ["to", "frm"])
 
-def make_move(bitboards:bb.Bitboards, move:Move)->bb.Bitboards:
+def make_move(bitboards:bb.Bitboards, move:Move) -> bb.Bitboards:
     """Clear move.frm and set move.to in the same bitboard. Clear move.to"""
     def f(bb: bb.BB, frm_bb: bb.BB, to_bb: bb.BB):
         if bb & frm_bb:
@@ -20,12 +20,13 @@ def make_move(bitboards:bb.Bitboards, move:Move)->bb.Bitboards:
     return bb.Bitboards(*[f(bb, bb.BB_square(move.frm), bb.BB_square(move.to)) for bb in bitboards])
 
 
-def square_distance(a:sq.Square, b:sq.Square)->int:
+def square_distance(a:sq.Square, b:sq.Square) -> int:
     """Rank or file difference (whichever is greater)"""
     return max(abs(sq.rank_of_square(a) - sq.rank_of_square(b)),
                abs(sq.file_of_square(a) - sq.file_of_square(b)))
 
-def sliding_moves(square:sq.Square, occupied: bb.BB, deltas:Iterable[int])->bb.BB:
+
+def sliding_moves(square:sq.Square, occupied: bb.BB, deltas:Iterable[int]) -> bb.BB:
     """
     Repeatedly add a delta to square until resultant is outside bitboard range,
     until resultant wraps around bitboard, or encounters a piece (WILL INCLUDE THAT PIECE)
@@ -44,36 +45,45 @@ def sliding_moves(square:sq.Square, occupied: bb.BB, deltas:Iterable[int])->bb.B
                 break
     return moves
 
-def step_moves(square:sq.Square, deltas:Iterable[int])->bb.BB:
+
+def step_moves(square:sq.Square, deltas:Iterable[int]) -> bb.BB:
     """Generate bitboard of square+deltas, if resultant is within bitboard range and doesn't wrap board"""
     return bb.reduce_with_bitwise_or(bb.BB.BB_square(square+delta)
                                   for delta in deltas
                                   if not (0<square+delta<=64)
                                   or 2>=square_distance(square,square+delta))
 
-def pawn_attacks(square:sq.Square, color:bool)->bb.BB:
+
+def pawn_attacks(square:sq.Square, color:bool) -> bb.BB:
     """Must be bitwise and'd with all squares occupied by enemy, make sure to include en passent"""
     return step_moves(square, ((-7, -9), (7, 9))[color])
 
-def pawn_pushes(square:sq.Square, color:bool)->bb.BB:
+
+def pawn_pushes(square:sq.Square, color:bool) -> bb.BB:
     return step_moves(square, ((-1), (1))[color])
 
-def knight_moves(square:sq.Square)->bb.BB:
+
+def knight_moves(square:sq.Square) -> bb.BB:
     return step_moves(square, (6, -6, 15, -15, 17, -17, 10, -10))
 
-def king_moves(square:sq.Square)->bb.BB:
+
+def king_moves(square:sq.Square) -> bb.BB:
     return step_moves(square, (1, -1, 8, -8, 9, -9))
 
-def rank_moves(square:sq.Square, occupied:bb.BB)->bb.BB:
+
+def rank_moves(square:sq.Square, occupied:bb.BB) -> bb.BB:
     return sliding_moves(square, occupied, (-1,1))
 
-def file_moves(square:sq.Square, occupied:bb.BB)->bb.BB:
+
+def file_moves(square:sq.Square, occupied:bb.BB) -> bb.BB:
     return sliding_moves(square, occupied, (-8,8))
 
-def diagonal_moves(square:sq.Square, occupied:bb.BB)->bb.BB:
+
+def diagonal_moves(square:sq.Square, occupied:bb.BB) -> bb.BB:
     return sliding_moves(square, occupied, (-9,9,-7,7))
 
-def piece_move_mask(square:sq.Square, piece:pce.Piece, occupied:bb.BB)->bb.BB:
+
+def piece_move_mask(square:sq.Square, piece:pce.Piece, occupied:bb.BB) -> bb.BB:
     moves:bb.BB = bb.BB(0)
     if abs(piece.value) in {3,5}: # Bishop or queen
         moves|=diagonal_moves(square, occupied)

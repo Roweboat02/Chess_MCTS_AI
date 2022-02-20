@@ -15,6 +15,14 @@ class BB(int):
         assert(bb > -1, "Must be positave")
         super(bb)
 
+    def bitboard_to_numpy(self) -> np.ndarray:
+        """
+        Convert bitboard from int representation to representing as a numpy array of 1's and 0's
+        @return arr:np.ndarray - An 8x8 numpy array (dtype=np.int16)
+        """
+        return np.unpackbits((self >> np.arange(0, 57, 8)).astype(np.uint8), bitorder="little").reshape(8, 8).astype(
+                np.int16)
+
     @classmethod
     def BB_rank(cls, rankNum: int) -> BB:
         """
@@ -53,7 +61,8 @@ class Bitboards(NamedTuple):
     queens:BB
     kings:BB
 
-    def piece_at(self, square:sq.Square)->pce.Piece|None:
+    def piece_at(self, square:sq.Square) -> pce.Piece | None:
+        """If a piece is at square, return its value, else return None"""
         if self.white & BB.BB_square(square):
             piece = 1
         elif self.black & BB.BB_square(square):
@@ -67,6 +76,7 @@ class Bitboards(NamedTuple):
 
     @classmethod
     def new_game(cls) -> Bitboards:
+        """Create a new Bitboards representing a new chess game"""
         return cls(
                 white=BB.BB_rank(1) | BB.BB_rank(2),
                 black=BB.BB_rank(7) | BB.BB_rank(8),
@@ -90,11 +100,3 @@ def reverse_scan_for_piece(bitboard:BB) -> Iterator[sq.Square]:
         length:int = bitboard.bit_length()-1
         yield length
         bitboard ^= 1<<length
-
-def bitboard_to_numpy(bb:BB) -> np.ndarray:
-    """
-    Convert bitboard from int representation to representing as a numpy array of 1's and 0's
-    @return arr:np.ndarray - An 8x8 numpy array (dtype=np.int16)
-    """
-    return np.unpackbits((bb >> np.arange(0, 57, 8)).astype(np.uint8), bitorder="little").reshape(8, 8).astype(
-        np.int16)

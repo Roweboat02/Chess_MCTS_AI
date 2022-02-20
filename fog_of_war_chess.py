@@ -16,39 +16,52 @@ class FOWChess:
     WHITE = True
     BLACK = False
 
-    def __init__(self, bitboards:bb.Bitboards) -> None:
-        self.current_turn: bool = self.WHITE
-        self._bitboards = bitboards
+    def __init__(self, bitboards:bb.Bitboards, turn:bool) -> None:
+        self.__current_turn: bool = turn # immutable
+        self.__bitboards = bitboards # immutable
+        self.__ep_square: bb.BB = bb.BB(0) # immutable #TODO
+
+    @property
+    def current_turn(self)->bool:
+        return self.__current_turn
+
+    @property
+    def bitboards(self) -> bb.Bitboards:
+        return self.__bitboards
+
+    @property
+    def ep_square(self) -> bb.BB:
+        return self.__ep_square
 
     @classmethod
     def new_game(cls) -> FOWChess:
-        return cls(bb.Bitboards.new_game())
+        return cls(bb.Bitboards.new_game(), cls.WHITE)
 
     def __hash__(self) -> bb.Bitboards:
-        return self._bitboards
+        return self.bitboards # don't think so, but might need to encorporate turn
 
     @property
     def is_over(self) -> bool: # TODO: more termination checks
         """True if 1 king left on board"""
-        return sum(bb.reverse_scan_for_piece(self._bitboards.kings)) == 1
+        return sum(bb.reverse_scan_for_piece(self.bitboards.kings)) == 1
 
     @property
-    def winner(self)-> bool | None:
-        w:int = self._bitboards.white & self._bitboards.kings
-        b:int = self._bitboards.black & self._bitboards.kings
+    def winner(self) -> bool | None: # TODO: more termination checks
+        w:int = self.bitboards.white & self.bitboards.kings
+        b:int = self.bitboards.black & self.bitboards.kings
         if w==b:
             return None
-        elif w==0:
+        elif not w:
             return self.BLACK
-        elif b==0:
+        elif not b:
             return self.WHITE
 
     @property
     def _occupied_squares(self) -> int:
-        return self._bitboards.white | self._bitboards.black
+        return self.bitboards.white | self.bitboards.black
 
     def _occupied_by_color(self, color:bool) -> int:
-        return self._bitboards.white if color else self._bitboards.black
+        return self.bitboards.white if color else self.bitboards.black
 
     @property
     def black_board(self) -> np.ndarray:
@@ -60,11 +73,11 @@ class FOWChess:
 
     @property
     def black_fog(self) -> np.ndarray:
-        return np.flip(bb.bitboard_to_numpy(self._visable_squares(False)), 0)
+        return np.flip(self._visable_squares(False).bitboard_to_numpy(), 0)
 
     @property
     def white_fog(self) -> np.ndarray:
-        return bb.bitboard_to_numpy(self._visable_squares(True))
+        return self._visable_squares(True).bitboard_to_numpy()
 
     @property
     def white_foggy_board(self) -> np.ndarray:
@@ -79,18 +92,18 @@ class FOWChess:
 
     def board_to_numpy(self) -> np.ndarray:
         return (
-               bb.bitboard_to_numpy(self._bitboards.kings) * pce.Piece['K'].value
-               + bb.bitboard_to_numpy(self._bitboards.queens) * pce.Piece['Q'].value
-               + bb.bitboard_to_numpy(self._bitboards.pawns) * pce.Piece['P'].value
-               + bb.bitboard_to_numpy(self._bitboards.rooks) * pce.Piece['R'].value
-               + bb.bitboard_to_numpy(self._bitboards.bishops) * pce.Piece['B'].value
-               + bb.bitboard_to_numpy(self._bitboards.knights) * pce.Piece['N'].value
+               self.bitboards.kings.bitboard_to_numpy() * pce.Piece['K'].value
+               + self.bitboards.queens.bitboard_to_numpy() * pce.Piece['Q'].value
+               + self.bitboards.pawns.bitboard_to_numpy() * pce.Piece['P'].value
+               + self.bitboards.rooks.bitboard_to_numpy() * pce.Piece['R'].value
+               + self.bitboards.bishops.bitboard_to_numpy() * pce.Piece['B'].value
+               + self.bitboards.knights.bitboard_to_numpy() * pce.Piece['N'].value
                ) * (
-               bb.bitboard_to_numpy(self._bitboards.black) * -1
-               + bb.bitboard_to_numpy(self._bitboards.white)
+               self.bitboards.black.bitboard_to_numpy() * -1
+               + self.bitboards.white.bitboard_to_numpy()
         )
 
-    def possible_moves(self)-> List[mv.Move]:
+    def possible_moves(self) -> List[mv.Move]:
         moves:List[mv.Move] = []
 
         our_pieces:bb.BB = bb.BB(self._occupied_by_color(self.current_turn))
@@ -100,15 +113,15 @@ class FOWChess:
         # Generate non-pawn moves.
         moves.extend([
                 mv.Move(to, frm)
-                        for frm in bb.reverse_scan_for_piece(our_pieces & ~self._bitboards.pawns)
-                        for to in bb.reverse_scan_for_piece(mv.piece_move_mask(frm, self._bitboards.piece_at(frm), pieces) & ~our_pieces)
+                        for frm in bb.reverse_scan_for_piece(our_pieces & ~self.bitboards.pawns)
+                        for to in bb.reverse_scan_for_piece(mv.piece_move_mask(frm, self.bitboards.piece_at(frm), pieces) & ~our_pieces)
                 ])
 
         # If there are pawns, generate their moves
-        pawns = self._bitboards.pawns & our_pieces
+        pawns = self.bitboards.pawns & our_pieces
         if pawns:
             # First if they can attack anyone
-            moves.extend( mv.Move(to,frm)
+            moves.extend( mv.Move(to, frm)
                 for frm in bb.reverse_scan_for_piece(pawns)
                 for to in bb.reverse_scan_for_piece(mv.pawn_attacks(frm, self.current_turn) & their_pieces)
             )
@@ -121,23 +134,23 @@ class FOWChess:
                 single_moves = pawns >> 8 & ~pieces
                 double_moves = (single_moves >> 8) & bb.BB.BB_rank(6) & ~pieces
 
-            moves.extend( mv.Move(to, to<<8) for to in bb.reverse_scan_for_piece(single_moves) )
-            moves.extend( mv.Move(to, to<<16) for to in bb.reverse_scan_for_piece(double_moves) )
+            moves.extend( mv.Move(to, to << 8) for to in bb.reverse_scan_for_piece(single_moves) )
+            moves.extend( mv.Move(to, to << 16) for to in bb.reverse_scan_for_piece(double_moves) )
 
-            if (self.board.ep_square and not
-                bb.BB.BB_square(self.board.ep_square) & pieces):
-                en_passant = self.board.ep_square #TODO: no idea how to do ep squares
+            if (self.ep_square and not
+                bb.BB.BB_square(self.ep_square) & pieces):
+                en_passant = self.ep_square #TODO: ep squares
                 moves.extend([])
 
         return moves
 
-    def make_move(self, move:mv.Move)-> FOWChess:
-        return FOWChess(mv.make_move(self._bitboards, move))
+    def make_move(self, move:mv.Move) -> FOWChess:
+        return FOWChess(mv.make_move(self.bitboards, move), not self.current_turn)
 
-    def make_random_move(self)-> FOWChess:
-        return FOWChess(mv.make_move(self._bitboards, randchoice(self.possible_moves())))
+    def make_random_move(self) -> FOWChess:
+        return FOWChess(mv.make_move(self.bitboards, randchoice(self.possible_moves())), not self.current_turn)
 
-    def _visable_squares(self, color: bool)-> bb.BB:
+    def _visable_squares(self, color: bool) -> bb.BB:
         """
         Run through each piece type's move patterns to find all possible moves.
         """
@@ -151,13 +164,13 @@ class FOWChess:
 
         # Generate non-pawn moves.
         piece_moves = bb.reduce_with_bitwise_or(
-            mv.piece_move_mask(frm, self._bitboards.piece_at(frm), pieces) & ~our_pieces
-            for frm in (bb.reverse_scan_for_piece(our_pieces & ~self._bitboards.pawns))
+            mv.piece_move_mask(frm, self.bitboards.piece_at(frm), pieces) & ~our_pieces
+            for frm in (bb.reverse_scan_for_piece(our_pieces & ~self.bitboards.pawns))
         )
         visable |= piece_moves
 
         # If there are pawns, generate their moves
-        pawns = self._bitboards.pawns & our_pieces
+        pawns = self.bitboards.pawns & our_pieces
         if pawns:
             # First if they can attack anyone
             pawn_attacks = bb.reduce_with_bitwise_or(
@@ -177,9 +190,9 @@ class FOWChess:
             visable |= single_moves | double_moves
 
             # Finally, check if an en passant is available
-            if (self.board.ep_square and not
-                bb.BB.BB_square(self.board.ep_square) & pieces):
-                en_passant = self.board.ep_square #TODO: no idea how to do ep squares
+            if (self.ep_square and not
+                bb.BB.BB_square(self.ep_square) & pieces):
+                en_passant = self.ep_square #TODO: ep squares
                 visable |= en_passant
 
         return bb.BB(visable)
