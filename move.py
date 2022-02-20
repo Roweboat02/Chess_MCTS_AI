@@ -44,7 +44,7 @@ def sliding_moves(square:sq.Square, occupied: bb.BB, deltas:Iterable[int])->bb.B
                 break
     return moves
 
-def step_moves(square:sq.Square, deltas:Iterable[int])->bb.BB:  # Prob split off the max(...) into it's own function at some point
+def step_moves(square:sq.Square, deltas:Iterable[int])->bb.BB:
     """Generate bitboard of square+deltas, if resultant is within bitboard range and doesn't wrap board"""
     return bb.reduce_with_bitwise_or(bb.BB.BB_square(square+delta)
                                   for delta in deltas
@@ -75,12 +75,12 @@ def diagonal_moves(square:sq.Square, occupied:bb.BB)->bb.BB:
 
 def piece_move_mask(square:sq.Square, piece:pce.Piece, occupied:bb.BB)->bb.BB:
     moves:bb.BB = bb.BB(0)
-    if abs(piece.value) in {3,5}:
+    if abs(piece.value) in {3,5}: # Bishop or queen
         moves|=diagonal_moves(square, occupied)
-    if abs(piece.value) in {4,5}:
+    if abs(piece.value) in {4,5}: # Rook or queen
         moves|=rank_moves(square, occupied)|file_moves(square,occupied)
-    if abs(piece.value) == 2:
+    if abs(piece.value) == 2: # knight
         moves|=knight_moves(square)
-    if abs(piece.value) == 6:
+    if abs(piece.value) == 6: # king
         moves |= king_moves(square)
     return moves
