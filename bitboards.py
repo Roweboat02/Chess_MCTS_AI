@@ -1,5 +1,6 @@
-from collections.abc import Iterator, Iterable
 from __future__ import annotations
+
+from collections.abc import Iterator, Iterable
 from functools import reduce
 from typing import NamedTuple
 
