@@ -2,11 +2,14 @@ from __future__ import annotations
 
 from typing import List
 
+from random import choice as randchoice
+
 import numpy as np
 
 import bitboards as bb
 import move as mv
 import piece as pce
+import square as sq
 
 
 class FOWChess:
@@ -14,6 +17,7 @@ class FOWChess:
     BLACK = False
 
     def __init__(self, bitboards:bb.Bitboards) -> None:
+        self.current_turn: bool = self.WHITE
         self._bitboards = bitboards
 
     @classmethod
@@ -91,11 +95,52 @@ class FOWChess:
                        + bb.bitboard_to_numpy(self._bitboards.white)
         )
 
-    def possible_moves(self)-> List[mv.Move]: pass #TODO: implement
+    def possible_moves(self)-> List[mv.Move]: #TODO: implement
+        moves:List[mv.Move] = []
 
-    def make_move(self, Move)-> FOWChess: pass  #TODO: implement
+        our_pieces:bb.BB = bb.BB(self._occupied_by_color(self.current_turn))
+        their_pieces:bb.BB = bb.BB(self._occupied_by_color(not self.current_turn))
+        pieces:bb.BB = our_pieces|their_pieces
 
-    def make_random_move(self)-> FOWChess: pass  #TODO: implement
+        # Generate non-pawn moves.
+        moves.extend([
+                mv.Move(to, frm)
+                        for frm in bb.reverse_scan_for_piece(our_pieces & ~self._bitboards.pawns)
+                        for to in bb.reverse_scan_for_piece(mv.piece_move_mask(frm, self._bitboards.piece_at(frm), pieces) & ~our_pieces)
+                ])
+
+        # If there are pawns, generate their moves
+        pawns = self._bitboards.pawns & our_pieces
+        if pawns:
+            # First if they can attack anyone
+            moves.extend( mv.Move(to,frm)
+                for frm in bb.reverse_scan_for_piece(pawns)
+                for to in bb.reverse_scan_for_piece(mv.pawn_attacks(frm, self.current_turn) & their_pieces)
+            )
+
+            # Then find their single and double moves
+            if self.current_turn == self.WHITE:
+                single_moves = (pawns << 8) & ~pieces
+                double_moves = (single_moves << 8) & bb.BB.BB_rank(4) & ~pieces
+            else:
+                single_moves = pawns >> 8 & ~pieces
+                double_moves = (single_moves >> 8) & bb.BB.BB_rank(6) & ~pieces
+
+            moves.extend( mv.Move(to, to<<8) for to in bb.reverse_scan_for_piece(single_moves) )
+            moves.extend( mv.Move(to, to<<16) for to in bb.reverse_scan_for_piece(double_moves) )
+
+            if (self.board.ep_square and not
+                bb.BB.BB_square(self.board.ep_square) & pieces):
+                en_passant = self.board.ep_square #TODO: no idea how to do ep squares
+                moves.extend([])
+
+        return moves
+
+    def make_move(self, move:mv.Move)-> FOWChess:
+        return FOWChess(mv.make_move(self._bitboards, move))
+
+    def make_random_move(self)-> FOWChess:
+        return FOWChess(mv.make_move(self._bitboards, randchoice(self.possible_moves())))
 
     def _visable_squares(self, color: bool)-> bb.BB:
         """
@@ -129,14 +174,11 @@ class FOWChess:
             # Then find their single and double moves
             if color == self.WHITE:
                 single_moves = pawns << 8 & ~pieces
-                double_moves = (
-                    single_moves << 8 & (bb.BB.BB_rank(3) | bb.BB.BB_rank(4)) & ~pieces
-                )
+                double_moves = single_moves << 8 & bb.BB.BB_rank(4) & ~pieces
+
             else:
                 single_moves = pawns >> 8 & ~pieces
-                double_moves = (
-                    single_moves >> 8 & (bb.BB.BB_rank(6) | bb.BB.BB_rank(5)) & ~pieces
-                )
+                double_moves = single_moves >> 8 & bb.BB.BB_rank(6) & ~pieces
             visable |= single_moves | double_moves
 
             # Finally, check if an en passant is available
