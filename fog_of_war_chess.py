@@ -13,19 +13,19 @@ class FOWChess:
     WHITE = True
     BLACK = False
 
-    def __init__(self, bitboards:bb.PieceBitboards) -> None:
+    def __init__(self, bitboards:bb.Bitboards) -> None:
         self._bitboards = bitboards
 
     @classmethod
     def new_game(cls) -> FOWChess:
-        a = cls(bb.PieceBitboards(0, 0, 0, 0, 0, 0, 0, 0))
+        a = cls(bb.Bitboards(bb.BB(0), bb.BB(0), bb.BB(0), bb.BB(0), bb.BB(0), bb.BB(0), bb.BB(0), bb.BB(0)))
         a._reset_board()
         return a
 
     def _reset_board(self) -> None:
-        self._bitboards = bb.NewGameBitboards()
+        self._bitboards = self._bitboards.new_game()
 
-    def __hash__(self) -> bb.PieceBitboards:
+    def __hash__(self) -> bb.Bitboards:
         return self._bitboards
 
     @property
@@ -78,7 +78,6 @@ class FOWChess:
     def apply_fog(self, board:np.ndarray, fog:np.ndarray) -> np.ndarray:
         return np.clip(board + np.logical_not(fog.copy())*20, -16, 15)  # This is a bit dumb but, I dunno
 
-
     def board_to_numpy(self) -> np.ndarray:
         return (
                        bb.bitboard_to_numpy(self._bitboards.kings) * pce.Piece['K'].value
@@ -98,18 +97,21 @@ class FOWChess:
 
     def make_random_move(self)-> FOWChess: pass  #TODO: implement
 
-    def _visable_squares(self, color: bool)-> int:
+    def _visable_squares(self, color: bool)-> bb.BB:
         """
         Run through each piece type's move patterns to find all possible moves.
         """
-        visable = 0
+        visable:bb.BB = bb.BB(0)
 
-        our_pieces = self._occupied_by_color(color)
+        our_pieces:bb.BB = bb.BB(self._occupied_by_color(color))
+        their_pieces:bb.BB = bb.BB(self._occupied_by_color(not color))
+        pieces:bb.BB = our_pieces|their_pieces
+
         visable |= our_pieces
 
         # Generate non-pawn moves.
         piece_moves = bb.reduce_with_bitwise_or(
-            bb.attack_masks(frm, bb.place_at(frm))
+            mv.piece_move_mask(frm, self._bitboards.piece_at(frm), pieces) & ~our_pieces
             for frm in (bb.reverse_scan_for_piece(our_pieces & ~self._bitboards.pawns))
         )
         visable |= piece_moves
@@ -119,28 +121,28 @@ class FOWChess:
         if pawns:
             # First if they can attack anyone
             pawn_attacks = bb.reduce_with_bitwise_or(
-                    bb.pawn_attacks(frm, color) & self._occupied_by_color(not color)
+                    mv.pawn_attacks(frm, color) & their_pieces
                 for frm in bb.reverse_scan_for_piece(pawns)
             )
             visable |= pawn_attacks
 
             # Then find their single and double moves
             if color == self.WHITE:
-                single_moves = pawns << 8 & ~self._occupied_squares
+                single_moves = pawns << 8 & ~pieces
                 double_moves = (
-                    single_moves << 8 & (bb.BB_rank(3) | bb.BB_rank(4)) & ~self._occupied_squares
+                    single_moves << 8 & (bb.BB.BB_rank(3) | bb.BB.BB_rank(4)) & ~pieces
                 )
             else:
-                single_moves = pawns >> 8 & ~self._occupied_squares
+                single_moves = pawns >> 8 & ~pieces
                 double_moves = (
-                    single_moves >> 8 & (bb.BB_rank(6) | bb.BB_rank(5)) & ~self._occupied_squares
+                    single_moves >> 8 & (bb.BB.BB_rank(6) | bb.BB.BB_rank(5)) & ~pieces
                 )
             visable |= single_moves | double_moves
 
             # Finally, check if an en passant is available
             if (self.board.ep_square and not
-                bb.BB_square(self.board.ep_square) & self._occupied_squares):
+                bb.BB.BB_square(self.board.ep_square) & pieces):
                 en_passant = self.board.ep_square #TODO: no idea how to do ep squares
                 visable |= en_passant
 
-        return visable
+        return bb.BB(visable)
