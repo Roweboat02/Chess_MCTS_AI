@@ -22,18 +22,13 @@ class FOWChess:
 
     @classmethod
     def new_game(cls) -> FOWChess:
-        a = cls(bb.Bitboards(bb.BB(0), bb.BB(0), bb.BB(0), bb.BB(0), bb.BB(0), bb.BB(0), bb.BB(0), bb.BB(0)))
-        a._reset_board()
-        return a
-
-    def _reset_board(self) -> None:
-        self._bitboards = self._bitboards.new_game()
+        return cls(bb.Bitboards.new_game())
 
     def __hash__(self) -> bb.Bitboards:
         return self._bitboards
 
     @property
-    def is_over(self) -> bool:
+    def is_over(self) -> bool: # TODO: more termination checks
         """True if 1 king left on board"""
         return sum(bb.reverse_scan_for_piece(self._bitboards.kings)) == 1
 
@@ -84,18 +79,18 @@ class FOWChess:
 
     def board_to_numpy(self) -> np.ndarray:
         return (
-                       bb.bitboard_to_numpy(self._bitboards.kings) * pce.Piece['K'].value
-                       + bb.bitboard_to_numpy(self._bitboards.queens) * pce.Piece['Q'].value
-                       + bb.bitboard_to_numpy(self._bitboards.pawns) * pce.Piece['P'].value
-                       + bb.bitboard_to_numpy(self._bitboards.rooks) * pce.Piece['R'].value
-                       + bb.bitboard_to_numpy(self._bitboards.bishops) * pce.Piece['B'].value
-                       + bb.bitboard_to_numpy(self._bitboards.knights) * pce.Piece['N'].value
+               bb.bitboard_to_numpy(self._bitboards.kings) * pce.Piece['K'].value
+               + bb.bitboard_to_numpy(self._bitboards.queens) * pce.Piece['Q'].value
+               + bb.bitboard_to_numpy(self._bitboards.pawns) * pce.Piece['P'].value
+               + bb.bitboard_to_numpy(self._bitboards.rooks) * pce.Piece['R'].value
+               + bb.bitboard_to_numpy(self._bitboards.bishops) * pce.Piece['B'].value
+               + bb.bitboard_to_numpy(self._bitboards.knights) * pce.Piece['N'].value
                ) * (
-                       bb.bitboard_to_numpy(self._bitboards.black) * -1
-                       + bb.bitboard_to_numpy(self._bitboards.white)
+               bb.bitboard_to_numpy(self._bitboards.black) * -1
+               + bb.bitboard_to_numpy(self._bitboards.white)
         )
 
-    def possible_moves(self)-> List[mv.Move]: #TODO: implement
+    def possible_moves(self)-> List[mv.Move]:
         moves:List[mv.Move] = []
 
         our_pieces:bb.BB = bb.BB(self._occupied_by_color(self.current_turn))
