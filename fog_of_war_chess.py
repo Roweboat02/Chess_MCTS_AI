@@ -150,10 +150,10 @@ class FOWChess:
         return moves
 
     def make_move(self, move: mv.Move) -> FOWChess:
-        return FOWChess(mv.make_move(self.bitboards, move), not self.current_turn)
+        return FOWChess(self.bitboards.make_move(move), not self.current_turn)
 
     def make_random_move(self) -> FOWChess:
-        return FOWChess(mv.make_move(self.bitboards, rand_choice(self.possible_moves())), not self.current_turn)
+        return FOWChess(self.bitboards.make_move(rand_choice(self.possible_moves())), not self.current_turn)
 
     def _visible_squares(self, color: bool) -> Bitboard:
         """

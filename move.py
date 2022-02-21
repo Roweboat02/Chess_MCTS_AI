@@ -10,25 +10,9 @@ Move = collections.namedtuple("Move",
                               ["to", "frm"])
 
 
-def make_move(bitboards: ChessBitboards, move: Move) -> ChessBitboards:
-    """Clear move.frm and set move.to in the same bitboard. Clear move.to"""
-
-    def f(current_bb: Bitboard, frm_bb: Bitboard, to_bb: Bitboard):
-        if current_bb & frm_bb:
-            return (current_bb ^ frm_bb) | to_bb
-        elif current_bb & to_bb:
-            return current_bb ^ to_bb
-        else:
-            return current_bb
-
-    return ChessBitboards(*[f(current_bb, Bitboard.from_square(move.frm), Bitboard.from_square(move.to))
-                            for current_bb in bitboards])
-
-
 def square_distance(a: Square, b: Square) -> int:
     """Rank or file difference (whichever is greater)"""
-    return max(abs(a.rank() - b.rank()),
-               abs(a.file() - b.file()))
+    return max(abs(a.rank() - b.rank()), abs(a.file() - b.file()))
 
 
 def sliding_moves(square: Square, occupied: Bitboard, deltas: Iterable[int]) -> Bitboard:
