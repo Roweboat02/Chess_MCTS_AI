@@ -1,5 +1,6 @@
 import enum
 
+
 class Piece(enum.Enum):
     P = 1  # White Pawn
     p = -1  # Black Pawn

@@ -10,7 +10,20 @@ import square as sq
 import piece as pce
 
 
-class BB(int):
+def reduce_with_bitwise_or(iterable: Iterable[Bitboard]) -> Bitboard:
+    """Bitwise-or all BBs in given iterable. Return resulting bitboard."""
+    return Bitboard(reduce(lambda x, y: x | y, iterable))
+
+
+def reverse_scan_for_piece(bitboard: Bitboard) -> Iterator[sq.Square]:
+    """Generator yielding all bit position numbers in the given bitboard."""
+    while bitboard:
+        length: int = bitboard.bit_length() - 1
+        yield length
+        bitboard ^= 1 << length
+
+
+class Bitboard(int):
     def __init__(self, bb: int):
         assert (bb.bit_length() <= 64, "Must be able to be represented as 64 bit")
         assert (bb > -1, "Must be positive")
@@ -25,7 +38,7 @@ class BB(int):
             np.int16)
 
     @classmethod
-    def BB_rank(cls, rank_num: int) -> BB:
+    def from_rank(cls, rank_num: int) -> Bitboard:
         """
         Create a bitboard with the specified rank set to 1.
         @param rank_num:int - integer between 1 and 8 (inclusive)
@@ -34,7 +47,7 @@ class BB(int):
         return cls(0b11111111 << (rank_num - 1) * 8)
 
     @classmethod
-    def BB_file(cls, file_num: int) -> BB:
+    def from_file(cls, file_num: int) -> Bitboard:
         """
         Create a bitboard with the specified file set to 1.
         @param file_num:int - integer between 1 and 8 (inclusive)
@@ -43,7 +56,7 @@ class BB(int):
         return cls(0x0101_0101_0101_0101 << (file_num - 1) * 8)
 
     @classmethod
-    def BB_square(cls, square_num: sq.Square) -> BB:
+    def from_square(cls, square_num: sq.Square) -> Bitboard:
         """
         Create a bitboard with the specified square set to 1, numbered rank*8 + file.
         @param square_num:Square - item from enum Square used as an int between 1 and 64 (inclusive)
@@ -52,52 +65,42 @@ class BB(int):
         return cls(1 << (square_num - 1))
 
 
-class Bitboards(NamedTuple):
-    black: BB
-    white: BB
-    pawns: BB
-    knights: BB
-    bishops: BB
-    rooks: BB
-    queens: BB
-    kings: BB
+class ChessBitboards(NamedTuple):
+    black: Bitboard
+    white: Bitboard
+    pawns: Bitboard
+    knights: Bitboard
+    bishops: Bitboard
+    rooks: Bitboard
+    queens: Bitboard
+    kings: Bitboard
 
     def piece_at(self, square: sq.Square) -> pce.Piece | None:
         """If a piece is at square, return its value, else return None"""
-        if self.white & BB.BB_square(square):
+        if self.white & Bitboard.from_square(square):
             piece = 1
-        elif self.black & BB.BB_square(square):
+        elif self.black & Bitboard.from_square(square):
             piece = -1
         else:
             return None
 
         for i, bb in enumerate(self[2:]):
-            if bb & BB.BB_square(square):
+            if bb & Bitboard.from_square(square):
                 return pce.Piece(i * piece)
 
     @classmethod
-    def new_game(cls) -> Bitboards:
+    def new_game(cls) -> ChessBitboards:
         """Create a new Bitboards representing a new chess game"""
         return cls(
-            white=BB.BB_rank(1) | BB.BB_rank(2),
-            black=BB.BB_rank(7) | BB.BB_rank(8),
-            pawns=BB.BB_rank(7) | BB.BB_rank(2),
-            knights=BB.BB_square(3) | BB.BB_square(6) | BB.BB_square(58) | BB.BB_square(62),
-            bishops=BB.BB_square(2) | BB.BB_square(7) | BB.BB_square(57) | BB.BB_square(63),
-            rooks=BB.BB_square(1) | BB.BB_square(8) | BB.BB_square(56) | BB.BB_square(64),
-            queens=BB.BB_square(4) | BB.BB_square(60),
-            kings=BB.BB_square(5) | BB.BB_square(61)
+            white=Bitboard.from_rank(1) | Bitboard.from_rank(2),
+            black=Bitboard.from_rank(7) | Bitboard.from_rank(8),
+            pawns=Bitboard.from_rank(7) | Bitboard.from_rank(2),
+            knights=Bitboard.from_square(3) | Bitboard.from_square(6) | Bitboard.from_square(58) | Bitboard.from_square(
+                62),
+            bishops=Bitboard.from_square(2) | Bitboard.from_square(7) | Bitboard.from_square(57) | Bitboard.from_square(
+                63),
+            rooks=Bitboard.from_square(1) | Bitboard.from_square(8) | Bitboard.from_square(56) | Bitboard.from_square(
+                64),
+            queens=Bitboard.from_square(4) | Bitboard.from_square(60),
+            kings=Bitboard.from_square(5) | Bitboard.from_square(61)
         )
-
-
-def reduce_with_bitwise_or(iterable: Iterable[BB]) -> BB:
-    """Bitwise-or all BBs in given iterable. Return resulting bitboard."""
-    return BB(reduce(lambda x, y: x | y, iterable))
-
-
-def reverse_scan_for_piece(bitboard: BB) -> Iterator[sq.Square]:
-    """Generator yielding all bit position numbers in the given bitboard."""
-    while bitboard:
-        length: int = bitboard.bit_length() - 1
-        yield length
-        bitboard ^= 1 << length
