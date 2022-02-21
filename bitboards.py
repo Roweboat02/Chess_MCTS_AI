@@ -141,4 +141,18 @@ class SpecialMoveBitboards(NamedTuple):
                 Bitboard.from_square(5) | Bitboard.from_square(61),
                 Bitboard(0))
 
-    def update(self, chess_bitboards:ChessBitboards, move:Move) -> SpecialMoveBitboards: pass #TODO
+    def update(self, chess_bitboards:ChessBitboards, move:Move) -> SpecialMoveBitboards:
+        ep:Bitboard = Bitboard(0)
+        kings:Bitboard = self.castling_kings
+        rooks:Bitboard = self.castling_rooks
+
+        if ((move.frm.rank == 2 and move.to.rank == 4) or (move.frm.rank == 7 and move.to.rank == 5)) and Bitboard.from_square(move.frm)&chess_bitboards.pawns:
+            ep = Bitboard.from_square(sq.Square((move.frm.rank + move.to.rank)/2)*8 + move.frm.file)
+
+        if kings and (move.frm==sq.Square(5) or move.frm==sq.Square(61)):
+            kings = kings& ~Bitboard.from_square(move.frm)
+
+        if rooks and (move.frm==sq.Square(1) or move.frm==sq.Square(8) or move.frm==sq.Square(57) or move.frm==sq.Square(64)):
+            rooks = rooks & ~Bitboard.from_square(move.frm)
+
+        return SpecialMoveBitboards(rooks, kings, ep)
