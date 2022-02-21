@@ -5,7 +5,7 @@
       <excludeFolder url="file://$MODULE_DIR$/Venv_Chess" />
       <excludeFolder url="file://$MODULE_DIR$/chess_venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.10 (Chess_MCTS_AI)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.9 (FOW_Chess)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">

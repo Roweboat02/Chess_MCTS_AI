@@ -9,7 +9,6 @@ import numpy as np
 import bitboards as bb
 import move as mv
 import piece as pce
-import square as sq
 
 
 class FOWChess:
