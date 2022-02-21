@@ -26,7 +26,6 @@ def reverse_scan_for_piece(bitboard: Bitboard) -> Iterator[sq.Square]:
 class Bitboard(int):
     # TODO: add more methods so results are also Bitboard https://stackoverflow.com/a/46196226
     # Also look into better ways to subclass builtins
-    # Also make alternative consturctors use main constructor so asserts (which should be errors prob) are checked
 
     def __new__(cls, bb: int):
         if not (bb.bit_length() <= 64 or bb > -1):
