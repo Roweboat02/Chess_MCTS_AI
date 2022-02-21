@@ -38,7 +38,10 @@ class Bitboard(int):
         Convert bitboard from int representation to representing as a numpy array of 1's and 0's
         @return arr:np.ndarray - An 8x8 numpy array (dtype=np.int16)
         """
-        return np.flipud(np.unpackbits((int(self) >> np.arange(0, 57, 8, dtype=np.uint8)).astype(np.uint8), bitorder="little").reshape(8, 8).astype(np.int16))
+        return np.flipud(
+                np.unpackbits(
+                        (int(self) >> np.arange(0, 57, 8, dtype=np.uint8)).astype(np.uint8),
+                        bitorder="little").reshape(8, 8).astype(np.int16))
 
     @classmethod
     def from_rank(cls, rank_num: int) -> Bitboard:
@@ -131,9 +134,11 @@ class SpecialMoveBitboards(NamedTuple):
     castling_kings: Bitboard
     ep_squares: Bitboard
 
-    # @classmethod
-    # def new_game(cls) -> SpecialMoveBitboards:
-    #     return cls(
-    #             0x81 | 0x81<<56,
-    #
-    #                )
+    @classmethod
+    def new_game(cls) -> SpecialMoveBitboards:
+        return cls(
+                Bitboard.from_square(1) | Bitboard.from_square(8) | Bitboard.from_square(56) | Bitboard.from_square(64),
+                Bitboard.from_square(5) | Bitboard.from_square(61),
+                Bitboard(0))
+
+    def update(self, chess_bitboards:ChessBitboards, move:Move) -> SpecialMoveBitboards: pass #TODO

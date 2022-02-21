@@ -6,7 +6,7 @@ from random import choice as rand_choice
 
 import numpy as np
 
-from bitboards import Bitboard, ChessBitboards
+from bitboards import Bitboard, ChessBitboards, SpecialMoveBitboards
 import bitboards as bb
 
 import move as mv
@@ -22,10 +22,10 @@ class FOWChess:
     WHITE = True
     BLACK = False
 
-    def __init__(self, bitboards: ChessBitboards, turn: bool) -> None:
+    def __init__(self, bitboards: ChessBitboards, turn: bool, special_moves: SpecialMoveBitboards) -> None:
         self.__current_turn: bool = turn  # immutable
         self.__bitboards = bitboards  # immutable
-        self.__ep_square: Bitboard = Bitboard(0)  # immutable #TODO
+        self.__special: SpecialMoveBitboards = special_moves  # immutable #TODO
 
     @property
     def current_turn(self) -> bool:
@@ -36,12 +36,16 @@ class FOWChess:
         return self.__bitboards
 
     @property
+    def special_moves(self) -> SpecialMoveBitboards:
+        return self.__special
+
+    @property
     def ep_square(self) -> Bitboard:
-        return self.__ep_square
+        return self.__special.ep_squares
 
     @classmethod
     def new_game(cls) -> FOWChess:
-        return cls(ChessBitboards.new_game(), cls.WHITE)
+        return cls(ChessBitboards.new_game(), cls.WHITE, SpecialMoveBitboards.new_game())
 
     def __hash__(self) -> ChessBitboards:
         return self.bitboards  # don't think so, but might need to incorporate turn
@@ -150,10 +154,17 @@ class FOWChess:
         return moves
 
     def make_move(self, move: mv.Move) -> FOWChess:
-        return FOWChess(self.bitboards.make_move(move), not self.current_turn)
+        """
+        Given a move, create a set of bitboards with that move made.
+        Checking if move is valid is responsibility of caller.
+        """
+        return FOWChess(
+                bitboards=self.bitboards.make_move(move),
+                turn = not self.current_turn,
+                special_moves=self.special_moves.update(self.bitboards, move))
 
     def make_random_move(self) -> FOWChess:
-        return FOWChess(self.bitboards.make_move(rand_choice(self.possible_moves())), not self.current_turn)
+        return self.make_move(rand_choice(self.possible_moves()))
 
     def _visible_squares(self, color: bool) -> Bitboard:
         """
