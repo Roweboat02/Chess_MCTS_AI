@@ -24,8 +24,9 @@ def reverse_scan_for_piece(bitboard: Bitboard) -> Iterator[sq.Square]:
 
 
 class Bitboard(int):
-    # TODO: add more methods so results are also Bitboard https://stackoverflow.com/a/46196226
-    # Also look into better ways to subclass builtins
+    square_masks = {sqr: 1 << (sqr-1) for sqr in sq.Square}
+    rank_masks = {rank:0xff << ((rank-1) * 8) for rank in range(1,9)}
+    file_masks = {file:0x0101_0101_0101_0101 << ((file-1) * 8) for file in range(1,9)}
 
     def __new__(cls, bb: int):
         """
@@ -53,8 +54,8 @@ class Bitboard(int):
         @return bb:int - int that can be interpreted as an 8x8 bitboard with rank (row) rankNum 1, and all else 0.
         """
         if not 0<rank_num<9:
-            raise ValueError
-        return cls(0b11111111 << (rank_num - 1) * 8)
+            raise ValueError("Must be a positave interger between 1 and 8 (inclusive)")
+        return cls(cls.rank_masks[rank_num])
 
     @classmethod
     def from_file(cls, file_num: int) -> Bitboard:
@@ -64,8 +65,8 @@ class Bitboard(int):
         @return bb:int - int that can be interpreted as an 8x8 bitboard with file (col) fileNum 1, and all else 0.
         """
         if not 0<file_num<9:
-            raise ValueError
-        return cls(0x0101_0101_0101_0101 << (file_num - 1) * 8)
+            raise ValueError("Must be a positave interger between 1 and 8 (inclusive)")
+        return cls(cls.file_masks[file_num])
 
     @classmethod
     def from_square(cls, square_num: sq.Square) -> Bitboard:
@@ -74,7 +75,7 @@ class Bitboard(int):
         @param square_num:Square - item from enum Square used as an int between 1 and 64 (inclusive)
         @return bb:int - int that can be interpreted as an 8x8 bitboard with square squareNum, and all else 0.
         """
-        return cls(1 << (square_num - 1))
+        return cls(cls.square_masks[square_num])
 
 
 class ChessBitboards(NamedTuple):
