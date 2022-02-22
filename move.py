@@ -1,8 +1,8 @@
 import collections
 from collections.abc import Iterable
 
-import bitboards as bb
-from bitboards import Bitboard, ChessBitboards
+from bitboard import Bitboard
+from helper_functions import reduce_with_bitwise_or
 from square import Square
 import piece as pce
 
@@ -37,10 +37,10 @@ def sliding_moves(square: Square, occupied: Bitboard, deltas: Iterable[int]) -> 
 
 def step_moves(square: Square, deltas: Iterable[int]) -> Bitboard:
     """Generate bitboard of square+deltas, if resultant is within bitboard range and doesn't wrap board"""
-    return bb.reduce_with_bitwise_or(Bitboard.from_square(square + delta)
-                                     for delta in deltas
-                                     if not (0 < square + delta <= 64)
-                                     or 2 >= square_distance(square, square + delta))
+    return reduce_with_bitwise_or(Bitboard.from_square(square + delta)
+                                  for delta in deltas
+                                  if not (0 < square + delta <= 64)
+                                  or 2 >= square_distance(square, square + delta))
 
 
 def pawn_attacks(square: Square, color: bool) -> Bitboard:

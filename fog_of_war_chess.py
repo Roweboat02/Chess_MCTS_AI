@@ -6,8 +6,8 @@ from random import choice as rand_choice
 
 import numpy as np
 
-from bitboards import Bitboard, ChessBitboards, SpecialMoveBitboards
-import bitboards as bb
+from bitboard_collections import Bitboard, ChessBitboards, SpecialMoveBitboards
+from helper_functions import reverse_scan_for_piece, reduce_with_bitwise_or
 
 import move as mv
 import piece as pce
@@ -71,7 +71,7 @@ class FOWChess:
     @property
     def is_over(self) -> bool:  # TODO: better termination checks
         """True if 1 king left on board"""
-        return sum(bb.reverse_scan_for_piece(self.bitboards.kings)) == 1
+        return sum(reverse_scan_for_piece(self.bitboards.kings)) == 1
 
     @property
     def winner(self) -> bool | None:  # mabye make this a class
@@ -145,9 +145,9 @@ class FOWChess:
         # Generate non-pawn moves.
         moves.extend([
             mv.Move(to=to, frm=frm)
-            for frm in bb.reverse_scan_for_piece(our_pieces & ~self.bitboards.pawns)
+            for frm in reverse_scan_for_piece(our_pieces & ~self.bitboards.pawns)
             for to in
-            bb.reverse_scan_for_piece(mv.piece_move_mask(frm, self.bitboards.piece_at(frm), everyones_pieces) & ~our_pieces)
+            reverse_scan_for_piece(mv.piece_move_mask(frm, self.bitboards.piece_at(frm), everyones_pieces) & ~our_pieces)
         ])
 
         # TODO: Castling in Move
@@ -204,8 +204,8 @@ class FOWChess:
         if pawns := self.bitboards.pawns & our_pieces:
             # First if they can attack anyone
             moves.extend(mv.Move(to, frm)
-                         for frm in bb.reverse_scan_for_piece(pawns)
-                         for to in bb.reverse_scan_for_piece(mv.pawn_attacks(frm, self.current_turn) & their_pieces)
+                         for frm in reverse_scan_for_piece(pawns)
+                         for to in reverse_scan_for_piece(mv.pawn_attacks(frm, self.current_turn) & their_pieces)
                          )
 
             # Then find their single and double moves
@@ -216,8 +216,8 @@ class FOWChess:
                 single_moves = pawns >> 8 & ~everyones_pieces
                 double_moves = (single_moves >> 8) & (Bitboard.from_rank(6) | Bitboard.from_rank(5)) & ~everyones_pieces
 
-            moves.extend(mv.Move(to, to - 8) for to in bb.reverse_scan_for_piece(single_moves))
-            moves.extend(mv.Move(to, to - 16) for to in bb.reverse_scan_for_piece(double_moves))
+            moves.extend(mv.Move(to, to - 8) for to in reverse_scan_for_piece(single_moves))
+            moves.extend(mv.Move(to, to - 16) for to in reverse_scan_for_piece(double_moves))
 
             # Check for en passent
             if self.special_moves.ep_bitboard and not (self.special_moves.ep_bitboard & everyones_pieces):
@@ -226,7 +226,7 @@ class FOWChess:
                 # "If there was one of their pawns on the ep square, would it be attacking one of our pawns?"
                 ep_square:sq.Square = sq.Square(self.special_moves.ep_bitboard.bit_length())
                 moves.extend([mv.Move(ep_square, sq.Square(frm.bit_length()))
-                              for frm in bb.reverse_scan_for_piece(
+                              for frm in reverse_scan_for_piece(
                                 mv.pawn_attacks(ep_square, not self.current_turn) & pawns)])
 
         return moves
@@ -244,18 +244,18 @@ class FOWChess:
         visible |= our_pieces
 
         # Generate non-pawn moves.
-        piece_moves = bb.reduce_with_bitwise_or(
+        piece_moves = reduce_with_bitwise_or(
             mv.piece_move_mask(frm, self.bitboards.piece_at(frm), pieces) & ~our_pieces
-            for frm in (bb.reverse_scan_for_piece(our_pieces & ~self.bitboards.pawns))
+            for frm in (reverse_scan_for_piece(our_pieces & ~self.bitboards.pawns))
         )
         visible |= piece_moves
 
         # If there are pawns, generate their moves
         if pawns := self.bitboards.pawns & our_pieces:
             # First if they can attack anyone
-            pawn_attacks = bb.reduce_with_bitwise_or(
+            pawn_attacks = reduce_with_bitwise_or(
                 mv.pawn_attacks(frm, color) & their_pieces
-                for frm in bb.reverse_scan_for_piece(pawns)
+                for frm in reverse_scan_for_piece(pawns)
             )
             visible |= pawn_attacks
 
@@ -272,8 +272,8 @@ class FOWChess:
             # Finally, check if an en passant is available
             if self.special_moves.ep_bitboard and not (Bitboard.from_square(self.special_moves.ep_bitboard) & pieces):
                 ep_square: sq.Square = sq.Square(self.special_moves.ep_bitboard.bit_length())
-                visible |= bb.reduce_with_bitwise_or( frm
-                for frm in bb.reverse_scan_for_piece(
+                visible |= reduce_with_bitwise_or( frm
+                for frm in reverse_scan_for_piece(
                         mv.pawn_attacks(ep_square, not self.current_turn) & pawns))
 
         return Bitboard(visible)
