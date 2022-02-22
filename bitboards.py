@@ -28,13 +28,16 @@ class Bitboard(int):
     # Also look into better ways to subclass builtins
 
     def __new__(cls, bb: int):
+        """
+        64bit uint bitboard.
+        Bitboard must be a positave interger representable as 64 bits."""
         if not (bb.bit_length() <= 64 or bb > -1):
             raise ValueError("Must be a positave interger representable as 64 bits")
         return super(Bitboard, cls).__new__(cls, bb)
 
     def bitboard_to_numpy(self) -> np.ndarray:
         """
-        Convert bitboard from int representation to representing as a numpy array of 1's and 0's
+        Convert bitboard from int representation to representing as an 8x8 numpy array of 1's and 0's
         @return arr:np.ndarray - An 8x8 numpy array (dtype=np.int16)
         """
         return np.flipud(
@@ -131,26 +134,37 @@ class ChessBitboards(NamedTuple):
 class SpecialMoveBitboards(NamedTuple):
     castling_rooks: Bitboard
     castling_kings: Bitboard
-    ep_squares: Bitboard
+    ep_square: Bitboard
+
+
+    def castling_rights(self, current_turn_colour:Bitboard) -> Bitboard:
+        """kings and rooks of current_turn who can legally castle"""
+        return current_turn_colour & (self.castling_rooks | self.castling_kings)
+
 
     @classmethod
     def new_game(cls) -> SpecialMoveBitboards:
+        """Alternate constructor for the SpecialMoveBitboards of a new game"""
         return cls(
                 Bitboard.from_square(1) | Bitboard.from_square(8) | Bitboard.from_square(56) | Bitboard.from_square(64),
                 Bitboard.from_square(5) | Bitboard.from_square(61),
                 Bitboard(0))
 
     def update(self, chess_bitboards:ChessBitboards, move:Move) -> SpecialMoveBitboards:
+        """Given the current board and the move being made, and determine the new state of special moves"""
         ep:Bitboard = Bitboard(0)
         kings:Bitboard = self.castling_kings
         rooks:Bitboard = self.castling_rooks
 
+        # Test ep squares
         if ((move.frm.rank == 2 and move.to.rank == 4) or (move.frm.rank == 7 and move.to.rank == 5)) and Bitboard.from_square(move.frm)&chess_bitboards.pawns:
             ep = Bitboard.from_square(sq.Square((move.frm.rank + move.to.rank)/2)*8 + move.frm.file)
 
+        # Test if kings move
         if kings and (move.frm==sq.Square(5) or move.frm==sq.Square(61)):
-            kings = kings& ~Bitboard.from_square(move.frm)
+            kings = kings & ~Bitboard.from_square(move.frm)
 
+        # Test if rooks move
         if rooks and (move.frm==sq.Square(1) or move.frm==sq.Square(8) or move.frm==sq.Square(57) or move.frm==sq.Square(64)):
             rooks = rooks & ~Bitboard.from_square(move.frm)
 

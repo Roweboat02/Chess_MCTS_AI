@@ -5,10 +5,12 @@ Square = Enum("Square", [chr(letter) + str(number) for letter in range(ord('a'),
 
 
 def rank_of_square(self: Square) -> int:
+    """Which rank (row) square is in"""
     return self % 8
 
 
 def file_of_square(self: Square) -> int:
+    """Which file (col) square is in"""
     return self // 8
 
 
