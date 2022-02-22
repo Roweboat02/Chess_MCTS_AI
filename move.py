@@ -79,6 +79,7 @@ def diagonal_moves(square: Square, occupied: Bitboard) -> Bitboard:
 def piece_move_mask(square: Square, piece: pce.Piece, occupied: Bitboard) -> Bitboard:
     """
     Possible move @param piece could make if it were on @param square
+    Does not work for pawns
     Will include the first piece in occupied @param piece will hit. Bitwise or with turn's color bitboard.
     """
     moves: Bitboard = Bitboard(0)

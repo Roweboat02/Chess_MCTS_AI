@@ -134,13 +134,15 @@ class ChessBitboards(NamedTuple):
 class SpecialMoveBitboards(NamedTuple):
     castling_rooks: Bitboard
     castling_kings: Bitboard
-    ep_square: Bitboard
+    ep_bitboard: Bitboard
 
+    @property
+    def queenside_castling(self):
+        return self.castling_rooks & Bitboard.from_file(1)
 
-    def castling_rights(self, current_turn_colour:Bitboard) -> Bitboard:
-        """kings and rooks of current_turn who can legally castle"""
-        return current_turn_colour & (self.castling_rooks | self.castling_kings)
-
+    @property
+    def kingside_castling(self):
+        return self.castling_rooks & Bitboard.from_file(1)
 
     @classmethod
     def new_game(cls) -> SpecialMoveBitboards:
@@ -160,11 +162,11 @@ class SpecialMoveBitboards(NamedTuple):
         if ((move.frm.rank == 2 and move.to.rank == 4) or (move.frm.rank == 7 and move.to.rank == 5)) and Bitboard.from_square(move.frm)&chess_bitboards.pawns:
             ep = Bitboard.from_square(sq.Square((move.frm.rank + move.to.rank)/2)*8 + move.frm.file)
 
-        # Test if kings move
+        # Test if kings have moved
         if kings and (move.frm==sq.Square(5) or move.frm==sq.Square(61)):
             kings = kings & ~Bitboard.from_square(move.frm)
 
-        # Test if rooks move
+        # Test if rooks have moved
         if rooks and (move.frm==sq.Square(1) or move.frm==sq.Square(8) or move.frm==sq.Square(57) or move.frm==sq.Square(64)):
             rooks = rooks & ~Bitboard.from_square(move.frm)
 

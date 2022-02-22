@@ -32,7 +32,7 @@ class FOWChess:
         # immutable
         self.__current_turn: bool = turn  # color of the current player
         self.__bitboards = bitboards  # Interger bitboards of both colors and all pieces
-        self.__special: SpecialMoveBitboards = special_moves  # Bitboards for castling/ep rights
+        self.__special: SpecialMoveBitboards = special_moves  # Bitboards for castling/ep bitboards
 
     @property
     def current_turn(self) -> bool:
@@ -46,30 +46,23 @@ class FOWChess:
 
     @property
     def special_moves(self) -> SpecialMoveBitboards:
-        """Bitboards representing ep squares and casling rights"""
+        """Bitboards representing ep and castling bitboards"""
         return self.__special
 
     @classmethod
     def new_game(cls) -> FOWChess:
-        """Alternate constructor for a FOWChess game, in the standard chess board starting position."""
+        """Alternate constructor for a FOWChess game, creates game in the standard chess board starting position."""
         return cls(ChessBitboards.new_game(), cls.WHITE, SpecialMoveBitboards.new_game())
 
-    @property
-    def castling_rights(self) -> Bitboard:
-        """The kings and rooks of current turn's player, who can still legally castle"""
-        return self.__special.castling_rights(self.__bitboards.white if self.__current_turn else self.__bitboards.black)
-
     def make_move(self, move: mv.Move) -> FOWChess:
-        """
-        Given a move, create a set of bitboards with that move made.
-        Checking if move is valid is responsibility of caller.
-        """
+        """Given a move, create a FOWChess node where that move has been made."""
         return FOWChess(
                 bitboards=self.bitboards.make_move(move),
                 turn = not self.current_turn,
                 special_moves=self.special_moves.update(self.bitboards, move))
 
     def make_random_move(self) -> FOWChess:
+        """Make a randomly chosen move from the list of possible moves"""
         return self.make_move(rand_choice(self.possible_moves()))
 
     def __hash__(self) -> Tuple:
@@ -147,42 +140,68 @@ class FOWChess:
 
         our_pieces: Bitboard = self._occupied_by_color(self.current_turn)
         their_pieces: Bitboard = self._occupied_by_color(not self.current_turn)
-        pieces: Bitboard = our_pieces | their_pieces
+        everyones_pieces: Bitboard = our_pieces | their_pieces
 
         # Generate non-pawn moves.
         moves.extend([
-            mv.Move(to, frm)
+            mv.Move(to=to, frm=frm)
             for frm in bb.reverse_scan_for_piece(our_pieces & ~self.bitboards.pawns)
             for to in
-            bb.reverse_scan_for_piece(mv.piece_move_mask(frm, self.bitboards.piece_at(frm), pieces) & ~our_pieces)
+            bb.reverse_scan_for_piece(mv.piece_move_mask(frm, self.bitboards.piece_at(frm), everyones_pieces) & ~our_pieces)
         ])
 
-        # TODO: Castling in moves
-        # TODO: Theres def a simpler way than double ifs but I'm lazy atm
+        # TODO: Castling in Move
+        # TODO: Mabye try and make castling checks it's own function.
 
-        # Try for castling
-        # BTW the chess rule book said only the two squares the king covers matters.
+        # BTW the chess rule book said only the king and his path matters.
 
-        # White castling
-        if self.current_turn:
+        # check for castling
+        if self.special_moves.castling_kings & our_pieces and self.special_moves.castling_rooks & our_pieces:
+            backrank:Bitboard = Bitboard.from_rank(1) if self.current_turn else Bitboard.from_rank(8)
+            c:Bitboard = backrank & Bitboard.from_file(3)
+            d:Bitboard = backrank & Bitboard.from_file(4)
+            f:Bitboard = backrank & Bitboard.from_file(6)
+            g:Bitboard = backrank & Bitboard.from_file(7)
+
+            our_king:Bitboard = self.bitboards.kings & our_pieces
+
+            def anyone_attacking(square_mask:Bitboard) -> bool:
+                """
+                Using the principal of
+                "Is one of their pieces attacking square" being logically the same as
+                "If a piece of our color was on square, could it attack the same piece type of their color"
+                determine if anyone is attacking square.
+                """
+                r_and_f_attackers = (self.bitboards.queens | self.bitboards.rooks) & their_pieces
+                diag_attackers = (self.bitboards.queens | self.bitboards.bishops) & their_pieces
+                king_attackers = (self.bitboards.kings | self.bitboards.queens) & their_pieces
+                knight_attackers = self.bitboards.knights & their_pieces
+
+                return any((
+                        (self.bitboards.pawns & their_pieces) & mv.pawn_attacks(square_mask, self.current_turn),
+                        (mv.rank_moves(square_mask, everyones_pieces) | mv.file_moves(square_mask, everyones_pieces)) & r_and_f_attackers,
+                        mv.diagonal_moves(square_mask, everyones_pieces) & diag_attackers,
+                        mv.king_moves(square_mask) & king_attackers,
+                        mv.knight_moves(square_mask) & knight_attackers))
+
+
             # Try for kingside castle
-            if self.castling_rights & ~(Bitboard.from_square(sq.Square(6)) & Bitboard.from_square(sq.Square(7))):
-                moves.append(mv.Move(sq.Square(5), mv.Square(7)))
+            if (self.special_moves.castling_kings & our_pieces
+                and self.special_moves.kingside_castling & our_pieces
+                and ~everyones_pieces & (f | g)
+                and not any(anyone_attacking(square) for square in (our_king, f, g))):
+                    moves.append(mv.Move(to=g.bit_length(),
+                                         frm=our_king.bit_length()))
             # Try for queenside
-            if self.castling_rights & ~(Bitboard.from_square(sq.Square(4)) & Bitboard.from_square(sq.Square(3))):
-                moves.append(mv.Move(sq.Square(1), mv.Square(4)))
-        # Black castling
-        else:
-            # Try for kingside castle
-            if self.castling_rights & ~(Bitboard.from_square(sq.Square(62)) & Bitboard.from_square(sq.Square(63))):
-                moves.append(mv.Move(sq.Square(61), mv.Square(64)))
-            # Try for queenside
-            if self.castling_rights & ~(Bitboard.from_square(sq.Square(59)) & Bitboard.from_square(sq.Square(60))):
-                moves.append(mv.Move(sq.Square(61), mv.Square(57)))
+            if (self.special_moves.castling_kings & our_pieces
+                and self.special_moves.queenside_castling & our_pieces
+                and ~everyones_pieces & (c | d)
+                and not any(anyone_attacking(square) for square in (our_king, c, d))):
+                    moves.append(mv.Move(to=c.bit_length(),
+                                         frm=our_king.bit_length()))
 
         # If there are pawns, generate their moves
-        pawns = self.bitboards.pawns & our_pieces
-        if pawns:
+        if pawns := self.bitboards.pawns & our_pieces:
             # First if they can attack anyone
             moves.extend(mv.Move(to, frm)
                          for frm in bb.reverse_scan_for_piece(pawns)
@@ -191,26 +210,30 @@ class FOWChess:
 
             # Then find their single and double moves
             if self.current_turn == self.WHITE:
-                single_moves = (pawns << 8) & ~pieces
-                double_moves = (single_moves << 8) & Bitboard.from_rank(4) & ~pieces
+                single_moves = (pawns << 8) & ~everyones_pieces
+                double_moves = (single_moves << 8) & (Bitboard.from_rank(4) | Bitboard.from_rank(3)) & ~everyones_pieces
             else:
-                single_moves = pawns >> 8 & ~pieces
-                double_moves = (single_moves >> 8) & Bitboard.from_rank(6) & ~pieces
+                single_moves = pawns >> 8 & ~everyones_pieces
+                double_moves = (single_moves >> 8) & (Bitboard.from_rank(6) | Bitboard.from_rank(5)) & ~everyones_pieces
 
-            moves.extend(mv.Move(to, to << 8) for to in bb.reverse_scan_for_piece(single_moves))
-            moves.extend(mv.Move(to, to << 16) for to in bb.reverse_scan_for_piece(double_moves))
+            moves.extend(mv.Move(to, to - 8) for to in bb.reverse_scan_for_piece(single_moves))
+            moves.extend(mv.Move(to, to - 16) for to in bb.reverse_scan_for_piece(double_moves))
 
-            if self.special_moves.ep_square and not (Bitboard.from_square(self.special_moves.ep_square) & pieces):
-                moves.extend([mv.Move(to, sq.Square(self.special_moves.ep_square))
-                              for pawn in bb.reverse_scan_for_piece(pawns)
-                              for to in bb.reverse_scan_for_piece(mv.pawn_attacks(pawn, self.current_turn) & their_pieces)
-                              if self.special_moves.ep_square & to])
+            # Check for en passent
+            if self.special_moves.ep_bitboard and not (self.special_moves.ep_bitboard & everyones_pieces):
+                # "Is there one of our pawns attacking the ep square?"
+                # is logically the same question as
+                # "If there was one of their pawns on the ep square, would it be attacking one of our pawns?"
+                ep_square:sq.Square = sq.Square(self.special_moves.ep_bitboard.bit_length())
+                moves.extend([mv.Move(ep_square, sq.Square(frm.bit_length()))
+                              for frm in bb.reverse_scan_for_piece(
+                                mv.pawn_attacks(ep_square, not self.current_turn) & pawns & our_pieces)])
 
         return moves
 
     def _visible_squares(self, color: bool) -> Bitboard:
         """
-        Generate a bitboard of squares which should be visable to the param color (where True is white and black is false)
+        Generate a bitboard of squares which should be visable to the param color (where True is white and black is False)
         """
         visible: Bitboard = Bitboard(0)
 
@@ -248,10 +271,10 @@ class FOWChess:
             visible |= single_moves | double_moves
 
             # Finally, check if an en passant is available
-            if self.special_moves.ep_square and not (Bitboard.from_square(self.special_moves.ep_square) & pieces):
+            if self.special_moves.ep_bitboard and not (Bitboard.from_square(self.special_moves.ep_bitboard) & pieces):
                 visible |= bb.reduce_with_bitwise_or(
-                    sq.Square(self.special_moves.ep_square) for pawn in bb.reverse_scan_for_piece(pawns)
-                    for to in bb.reverse_scan_for_piece(mv.pawn_attacks(pawn, self.current_turn) & their_pieces)
-                    if self.special_moves.ep_square & to)
+                        sq.Square(self.special_moves.ep_bitboard) for pawn in bb.reverse_scan_for_piece(pawns)
+                        for to in bb.reverse_scan_for_piece(mv.pawn_attacks(pawn, self.current_turn) & their_pieces)
+                        if self.special_moves.ep_bitboard & to)
 
         return Bitboard(visible)
