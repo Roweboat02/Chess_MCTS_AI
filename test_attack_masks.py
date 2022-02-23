@@ -81,6 +81,7 @@ class TestAttackMasks(TestCase):
                             Bitboard.from_square(Square.h8))
 
         f3:Square = Square.f3
+        f3_occupied = Bitboard.from_square(Square.e2)
         f3_goal:Bitboard = (Bitboard.from_square(Square.b7) |
                             Bitboard.from_square(Square.c6) |
                             Bitboard.from_square(Square.d5) |
@@ -89,9 +90,8 @@ class TestAttackMasks(TestCase):
                             Bitboard.from_square(Square.g2) |
                             Bitboard.from_square(Square.h1) |
                             Bitboard.from_square(Square.g4) |
-                            Bitboard.from_square(Square.h5))
+                            Bitboard.from_square(Square.h5)) | f3_occupied
 
-        f3_occupied = Bitboard.from_square(Square.e2)
 
         a1_result = diagonal_moves(a1, Bitboard(0))
 
@@ -119,11 +119,25 @@ class TestAttackMasks(TestCase):
         self.assertEqual(f3_goal, f3_result)
 
 
-
-
-
-
-
-
     def test_piece_move_mask(self):
-        self.fail()
+        on_c2 = Square.c2
+        rook = (Bitboard.from_file(3)|Bitboard.from_rank(2))&~Bitboard.from_square(on_c2)
+        bishop = reduce_with_bitwise_or(Bitboard.from_square(s) for s in [Square.b1, Square.d1, Square.b3, Square.a4, Square.d3, Square.e4, Square.f5, Square.g6, Square.h7])
+        knight = reduce_with_bitwise_or(Bitboard.from_square(s) for s in [Square.b4, Square.d4, Square.a3, Square.e3, Square.e1, Square.a1])
+        queen = rook|bishop
+        king = reduce_with_bitwise_or(Bitboard.from_square(s) for s in [Square.c3, Square.c1, Square.b3, Square.b2, Square.b1, Square.d3, Square.d2, Square.d1,])
+
+        self.assertEqual(rook, piece_move_mask(on_c2, Piece.r, Bitboard(0)))
+        self.assertEqual(rook, piece_move_mask(on_c2, Piece.R, Bitboard(0)))
+
+        self.assertEqual(bishop, piece_move_mask(on_c2, Piece.b, Bitboard(0)))
+        self.assertEqual(bishop, piece_move_mask(on_c2, Piece.B, Bitboard(0)))
+
+        self.assertEqual(knight, piece_move_mask(on_c2, Piece.n, Bitboard(0)))
+        self.assertEqual(knight, piece_move_mask(on_c2, Piece.N, Bitboard(0)))
+
+        self.assertEqual(queen, piece_move_mask(on_c2, Piece.q, Bitboard(0)))
+        self.assertEqual(queen, piece_move_mask(on_c2, Piece.Q, Bitboard(0)))
+
+        self.assertEqual(king, piece_move_mask(on_c2, Piece.k, Bitboard(0)))
+        self.assertEqual(king, piece_move_mask(on_c2, Piece.K, Bitboard(0)))
