@@ -15,14 +15,14 @@ class TestAttackMasks(TestCase):
         white_h8:Bitboard = Bitboard(0)
         black_h8:Bitboard = Bitboard.from_square(Square.g7)
 
-        self.assertEqual( white_a2, pawn_attacks(a2, True))
-        self.assertEqual( black_a2, pawn_attacks(a2, False))
+        self.assertEqual(white_a2, pawn_attack_mask(a2, True))
+        self.assertEqual(black_a2, pawn_attack_mask(a2, False))
 
-        self.assertEqual( white_d5, pawn_attacks(d5, True))
-        self.assertEqual( black_d5, pawn_attacks(d5, False))
+        self.assertEqual(white_d5, pawn_attack_mask(d5, True))
+        self.assertEqual(black_d5, pawn_attack_mask(d5, False))
 
-        self.assertEqual( white_h8, pawn_attacks(h8, True))
-        self.assertEqual( black_h8, pawn_attacks(h8, False))
+        self.assertEqual(white_h8, pawn_attack_mask(h8, True))
+        self.assertEqual(black_h8, pawn_attack_mask(h8, False))
 
     def test_knight_moves(self):
         h8 = Square.h8

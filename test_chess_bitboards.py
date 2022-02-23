@@ -1,7 +1,7 @@
 from typing import List
 from unittest import TestCase
 from bitboard import Bitboard
-from bitboard_collections import ChessBitboards, SpecialMoveBitboards
+from bitboard_collections import ChessBitboards
 from move import Move
 from piece import Piece
 from square import Square

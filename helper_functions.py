@@ -1,3 +1,13 @@
+"""
+helper_functions.py
+File for general functions.
+
+Author: Noah Rowe
+Date: 2022/02/22
+    Functions were in various files before
+Last Modified: 2022/02/23
+    Added docstrings
+"""
 from collections.abc import Iterable
 from functools import reduce
 

@@ -22,9 +22,9 @@ class TestSquare(TestCase):
         self.g2: Tuple[int,int] = 2,7
         self.h1: Tuple[int,int] = 1,8
 
-        self.sqrs_as_ranks = [i for i in range(1,9) for j in range(1,9)]
+        self.sqrs_as_ranks = [i for i in range(1,9) for _ in range(1, 9)]
 
-        self.sqrs_as_files = [j for i in range(1,9) for j in range(1,9)]
+        self.sqrs_as_files = [j for _ in range(1, 9) for j in range(1, 9)]
 
     def test_square_values(self):
         self.assertLess(Square.a1.value, Square.a2.value)

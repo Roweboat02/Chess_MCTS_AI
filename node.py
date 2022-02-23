@@ -28,7 +28,7 @@ class Node:
 
     def populate(self) -> None:
         self.visited = True
-        self.possible_moves = self.game.possible_moves()
+        self.possible_moves = self.game.possible_moves_generator()
         self.children = [Node(self.game.make_move(move), self.depth+1, move) for move in self.possible_moves]
         self._unvisited_list = self.children.copy()
 

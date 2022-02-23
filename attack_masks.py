@@ -1,3 +1,12 @@
+"""
+attack_masks.py
+Functions for generating bitboard masks for different pieces attack patterns.
+
+Author: Noah Rowe
+Date: 2022/02/22
+Last Modified: 2022/02/23
+    Added docstrings
+"""
 from typing import Iterable
 
 from bitboard import Bitboard
@@ -6,9 +15,9 @@ from piece import Piece
 from square import Square
 
 
-def square_distance(a: Square, b: Square) -> int:
+def square_distance(square_a: Square, square_b: Square) -> int:
     """Rank or file difference (whichever is greater)"""
-    return max(abs(a.rank - b.rank), abs(a.file - b.file))
+    return max(abs(square_a.rank - square_b.rank), abs(square_a.file - square_b.file))
 
 
 def sliding_moves(square: Square, occupied: Bitboard, deltas: Iterable[int]) -> Bitboard:
@@ -23,7 +32,7 @@ def sliding_moves(square: Square, occupied: Bitboard, deltas: Iterable[int]) -> 
         sqr: int = square.value
         while True:
             sqr += delta
-            if (not (0 < sqr <= 64)) or (square_distance(Square(sqr), Square(sqr - delta)) > 2):
+            if not (0 < sqr <= 64) or (square_distance(Square(sqr), Square(sqr - delta)) > 2):
                 break
             moves |= Bitboard.from_square(Square(sqr))
             if occupied & Bitboard.from_square(Square(sqr)):
@@ -32,7 +41,9 @@ def sliding_moves(square: Square, occupied: Bitboard, deltas: Iterable[int]) -> 
 
 
 def step_moves(square: Square, deltas: Iterable[int]) -> Bitboard:
-    """Generate bitboard of square+deltas, if resultant is within bitboard range and doesn't wrap board"""
+    """
+    Generate bitboard of square+deltas, if resultant is within bitboard range and doesn't wrap board
+    """
     return reduce_with_bitwise_or(Bitboard.from_square(Square(square.value + delta))
                                   if (0 < square.value + delta <= 64)
                                   and 2 >= square_distance(square, Square(square.value + delta))
@@ -40,7 +51,7 @@ def step_moves(square: Square, deltas: Iterable[int]) -> Bitboard:
                                   for delta in deltas)
 
 
-def pawn_attacks(square: Square, color: bool) -> Bitboard:
+def pawn_attack_mask(square: Square, color: bool) -> Bitboard:
     """
     Possible squares a pawn on @param square of color @param color could attack
     Must be bitwise and'd with all squares occupied by enemy, make sure to include en passents
@@ -76,8 +87,10 @@ def diagonal_moves(square: Square, occupied: Bitboard) -> Bitboard:
 def piece_move_mask(square: Square, piece: Piece, occupied: Bitboard) -> Bitboard:
     """
     Possible move @param piece could make if it were on @param square
+
     Does not work for pawns
-    Will include the first piece in occupied @param piece will hit. Bitwise or with turn's color bitboard.
+    Will include the first piece in @param occupied @param piece will hit.
+    Bitwise or with turn's color bitboard.
     """
     moves: Bitboard = Bitboard(0)
     if abs(piece.value) in {3, 5}:  # Bishop or queen
