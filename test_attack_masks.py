@@ -71,7 +71,59 @@ class TestAttackMasks(TestCase):
         self.assertEqual(a1_moves, file_moves(a1, a1_occupied))
 
     def test_diagonal_moves(self):
-        self.fail()
+        a1:Square = Square.a1
+        a1_goal:Bitboard = (Bitboard.from_square(Square.b2)|
+                            Bitboard.from_square(Square.c3)|
+                            Bitboard.from_square(Square.d4)|
+                            Bitboard.from_square(Square.e5)|
+                            Bitboard.from_square(Square.f6)|
+                            Bitboard.from_square(Square.g7)|
+                            Bitboard.from_square(Square.h8))
+
+        f3:Square = Square.f3
+        f3_goal:Bitboard = (Bitboard.from_square(Square.b7) |
+                            Bitboard.from_square(Square.c6) |
+                            Bitboard.from_square(Square.d5) |
+                            Bitboard.from_square(Square.e4) |
+                            Bitboard.from_square(Square.a8) |
+                            Bitboard.from_square(Square.g2) |
+                            Bitboard.from_square(Square.h1) |
+                            Bitboard.from_square(Square.g4) |
+                            Bitboard.from_square(Square.h5))
+
+        f3_occupied = Bitboard.from_square(Square.e2)
+
+        a1_result = diagonal_moves(a1, Bitboard(0))
+
+        # a_r = format(a1_result, '064b')
+        # a_g = format(a1_goal, "064b")
+        # print("a1_result")
+        # for i in range(0, 65, 8):
+        #     print(a_r[i : i+8])
+        # print("a1_goal")
+        # for i in range(0, 65, 8):
+        #     print(a_g[i : i+8])
+
+        self.assertEqual(a1_goal, a1_result)
+        # print("\n\n\n\n")
+
+        f3_result = diagonal_moves(f3, f3_occupied)
+        # print("f3_result")
+        # f_r = format(f3_result, '064b')
+        # f_g = format(f3_goal, '064b')
+        # for i in range(0, 65, 8):
+        #     print(f_r[i : i+8])
+        # print("f3_goal")
+        # for i in range(0, 65, 8):
+        #     print(f_g[i : i+8])
+        self.assertEqual(f3_goal, f3_result)
+
+
+
+
+
+
+
 
     def test_piece_move_mask(self):
         self.fail()
