@@ -26,6 +26,11 @@ class TestSquare(TestCase):
 
         self.sqrs_as_files = [j for i in range(1,9) for j in range(1,9)]
 
+    def test_square_values(self):
+        self.assertLess(Square.a1.value, Square.a2.value)
+        self.assertLess(Square.b1.value, Square.a2.value)
+        self.assertLess(Square.a8.value, Square.h8.value)
+
     def test_diagonals(self):
         self.assertEqual(self.a1, (Square.a1.rank, Square.a1.file))
         self.assertEqual(self.b2, (Square.b2.rank, Square.b2.file))
