@@ -8,7 +8,7 @@ from square import Square
 
 def square_distance(a: Square, b: Square) -> int:
     """Rank or file difference (whichever is greater)"""
-    return max(abs(a.rank() - b.rank()), abs(a.file() - b.file()))
+    return max(abs(a.rank - b.rank), abs(a.file - b.file))
 
 
 def sliding_moves(square: Square, occupied: Bitboard, deltas: Iterable[int]) -> Bitboard:
@@ -33,10 +33,11 @@ def sliding_moves(square: Square, occupied: Bitboard, deltas: Iterable[int]) -> 
 
 def step_moves(square: Square, deltas: Iterable[int]) -> Bitboard:
     """Generate bitboard of square+deltas, if resultant is within bitboard range and doesn't wrap board"""
-    return reduce_with_bitwise_or(Bitboard.from_square(square + delta)
-                                  for delta in deltas
-                                  if not (0 < square + delta <= 64)
-                                  or 2 >= square_distance(square, square + delta))
+    return reduce_with_bitwise_or(Bitboard.from_square(Square(square.value + delta))
+                                  if (0 < square.value + delta <= 64)
+                                  and 2 >= square_distance(square, Square(square.value + delta))
+                                  else Bitboard(0)
+                                  for delta in deltas)
 
 
 def pawn_attacks(square: Square, color: bool) -> Bitboard:
@@ -54,7 +55,7 @@ def knight_moves(square: Square) -> Bitboard:
 
 def king_moves(square: Square) -> Bitboard:
     """Possible moves a king on @param square could make"""
-    return step_moves(square, (1, -1, 8, -8, 9, -9))
+    return step_moves(square, (1, -1, 8, -8, 9, -9, 7, -7))
 
 
 def rank_moves(square: Square, occupied: Bitboard) -> Bitboard:
