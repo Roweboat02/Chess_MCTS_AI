@@ -10,7 +10,7 @@ from bitboard_collections import Bitboard, ChessBitboards, SpecialMoveBitboards
 from helper_functions import reverse_scan_for_piece, reduce_with_bitwise_or
 
 import move as mv
-import piece as pce
+from piece import Piece
 import square as sq
 
 
@@ -89,12 +89,12 @@ class FOWChess:
     def board_as_numpy(self) -> np.ndarray:
         """A numpy representation of the chess board, using intergers. See Piece enum for encoding"""
         return (
-                       self.bitboards.kings.bitboard_to_numpy() * pce.Piece['K'].value
-                       + self.bitboards.queens.bitboard_to_numpy() * pce.Piece['Q'].value
-                       + self.bitboards.pawns.bitboard_to_numpy() * pce.Piece['P'].value
-                       + self.bitboards.rooks.bitboard_to_numpy() * pce.Piece['R'].value
-                       + self.bitboards.bishops.bitboard_to_numpy() * pce.Piece['B'].value
-                       + self.bitboards.knights.bitboard_to_numpy() * pce.Piece['N'].value
+                       self.bitboards.kings.bitboard_to_numpy() * Piece['K'].value
+                       + self.bitboards.queens.bitboard_to_numpy() * Piece['Q'].value
+                       + self.bitboards.pawns.bitboard_to_numpy() * Piece['P'].value
+                       + self.bitboards.rooks.bitboard_to_numpy() * Piece['R'].value
+                       + self.bitboards.bishops.bitboard_to_numpy() * Piece['B'].value
+                       + self.bitboards.knights.bitboard_to_numpy() * Piece['N'].value
                ) * (
                        self.bitboards.black.bitboard_to_numpy() * -1
                        + self.bitboards.white.bitboard_to_numpy()
@@ -158,10 +158,14 @@ class FOWChess:
         # check for castling
         if self.special_moves.castling_kings & our_pieces and self.special_moves.castling_rooks & our_pieces:
             backrank:Bitboard = Bitboard.from_rank(1) if self.current_turn else Bitboard.from_rank(8)
+            a:Bitboard = backrank & Bitboard.from_file(1)
+            b:Bitboard = backrank & Bitboard.from_file(2)
             c:Bitboard = backrank & Bitboard.from_file(3)
             d:Bitboard = backrank & Bitboard.from_file(4)
+
             f:Bitboard = backrank & Bitboard.from_file(6)
             g:Bitboard = backrank & Bitboard.from_file(7)
+            h:Bitboard = backrank & Bitboard.from_file(8)
 
             our_king:Bitboard = self.bitboards.kings & our_pieces
 
@@ -191,14 +195,18 @@ class FOWChess:
                 and ~everyones_pieces & (f | g)
                 and not any(anyone_attacking(square) for square in (our_king, f, g))):
                     moves.append(mv.Move(to=g.bit_length(),
-                                         frm=our_king.bit_length()))
+                                         frm=our_king.bit_length(),
+                                         rook_to=f.bit_length(),
+                                         rook_frm=h.bit_length()))
             # Try for queenside
             if (self.special_moves.castling_kings & our_pieces
                 and self.special_moves.queenside_castling & our_pieces
-                and ~everyones_pieces & (c | d)
+                and ~everyones_pieces & (b | c | d)
                 and not any(anyone_attacking(square) for square in (our_king, c, d))):
                     moves.append(mv.Move(to=c.bit_length(),
-                                         frm=our_king.bit_length()))
+                                         frm=our_king.bit_length(),
+                                         rook_frm=a.bit_length(),
+                                         rook_to=d.bit_length()))
 
         # If there are pawns, generate their moves
         if pawns := self.bitboards.pawns & our_pieces:
@@ -207,17 +215,28 @@ class FOWChess:
                          for frm in reverse_scan_for_piece(pawns)
                          for to in reverse_scan_for_piece(mv.pawn_attacks(frm, self.current_turn) & their_pieces)
                          )
-
+            backrank:Bitboard
             # Then find their single and double moves
             if self.current_turn == self.WHITE:
                 single_moves = (pawns << 8) & ~everyones_pieces
                 double_moves = (single_moves << 8) & (Bitboard.from_rank(4) | Bitboard.from_rank(3)) & ~everyones_pieces
+                backrank = Bitboard.from_rank(1)
             else:
                 single_moves = pawns >> 8 & ~everyones_pieces
                 double_moves = (single_moves >> 8) & (Bitboard.from_rank(6) | Bitboard.from_rank(5)) & ~everyones_pieces
+                backrank = Bitboard.from_rank(8)
 
             moves.extend(mv.Move(to, to - 8) for to in reverse_scan_for_piece(single_moves))
             moves.extend(mv.Move(to, to - 16) for to in reverse_scan_for_piece(double_moves))
+
+            # promotion
+            if backrank & pawns:
+                moves.extend(
+                        (mv.Move(to=pawn.bit_length(),
+                                frm=pawn.bit_length(),
+                                promotion_to=Piece(promote * (-1 * (not self.current_turn))))
+                         for pawn in reverse_scan_for_piece(pawns)
+                         for promote in (2, 3, 4)))
 
             # Check for en passent
             if self.special_moves.ep_bitboard and not (self.special_moves.ep_bitboard & everyones_pieces):

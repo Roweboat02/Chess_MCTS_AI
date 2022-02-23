@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import NamedTuple
+from typing import NamedTuple, Optional, List
 
 from square import Square
 import piece as pce
@@ -50,16 +50,29 @@ class ChessBitboards(NamedTuple):
     def make_move(self, move: Move) -> ChessBitboards:
         """Clear move.frm and set move.to in the same bitboard. Clear move.to"""
 
-        def f(current_bb: Bitboard, frm_bb: Bitboard, to_bb: Bitboard):
-            if current_bb & frm_bb:
-                return (current_bb ^ frm_bb) | to_bb
-            elif current_bb & to_bb:
-                return current_bb ^ to_bb
-            else:
-                return current_bb
+        if move.promotion_to is None:
+            def search(current_bb: Bitboard, frm_mask: Bitboard, to_mask: Bitboard,
+                       rook_frm_mask:Optional[Bitboard]=None, rook_to_mask:Optional[Bitboard]=None):
+                if move.rook_to is not None and current_bb & rook_frm_mask:
+                    return (current_bb ^ rook_frm_mask) | rook_to_mask
+                if current_bb & frm_mask:
+                    return (current_bb ^ frm_mask) | to_mask
+                elif current_bb & to_mask:
+                    return current_bb ^ to_mask
+                else:
+                    return current_bb
+            return ChessBitboards(*(search(current_bb,
+                                           Bitboard.from_square(move.frm),
+                                           Bitboard.from_square(move.to),
+                                           Bitboard.from_square(move.rook_frm) if move.rook_frm is not None else None,
+                                           Bitboard.from_square(move.rook_to) if move.rook_to is not None else None)
+                                    for current_bb in self))
+        else:
+            cpy:List[Bitboard] = list(self)
+            cpy[2] = self.pawns ^ move.frm
+            cpy[abs(move.promotion_to.value)+1] = cpy[abs(move.promotion_to.value)+1]  ^ move.to
+            return ChessBitboards(*cpy)
 
-        return ChessBitboards(*[f(current_bb, Bitboard.from_square(move.frm), Bitboard.from_square(move.to))
-                                for current_bb in self])
 
 class SpecialMoveBitboards(NamedTuple):
     castling_rooks: Bitboard

@@ -1,13 +1,19 @@
-import collections
 from collections.abc import Iterable
+from dataclasses import dataclass
+from typing import Optional
 
 from bitboard import Bitboard
 from helper_functions import reduce_with_bitwise_or
 from square import Square
-import piece as pce
+from piece import Piece
 
-Move = collections.namedtuple("Move",
-                              ["to", "frm"])
+@dataclass
+class Move:
+    to:Square
+    frm:Square
+    rook_to: Optional[Square] = None
+    rook_frm: Optional[Square] = None
+    promotion_to: Optional[Piece] = None
 
 
 def square_distance(a: Square, b: Square) -> int:
@@ -76,7 +82,7 @@ def diagonal_moves(square: Square, occupied: Bitboard) -> Bitboard:
     return sliding_moves(square, occupied, (-9, 9, -7, 7))
 
 
-def piece_move_mask(square: Square, piece: pce.Piece, occupied: Bitboard) -> Bitboard:
+def piece_move_mask(square: Square, piece: Piece, occupied: Bitboard) -> Bitboard:
     """
     Possible move @param piece could make if it were on @param square
     Does not work for pawns
