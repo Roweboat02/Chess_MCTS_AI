@@ -153,8 +153,6 @@ class FOWChess:
         # TODO: Castling in Move
         # TODO: Mabye try and make castling checks it's own function.
 
-        # BTW the chess rule book said only the king and his path matters.
-
         # check for castling
         if self.special_moves.castling_kings & our_pieces and self.special_moves.castling_rooks & our_pieces:
             backrank:Bitboard = Bitboard.from_rank(1) if self.current_turn else Bitboard.from_rank(8)
