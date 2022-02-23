@@ -4,8 +4,9 @@ from enum import Enum
 _squares:str = ""
 for number in range(1, 8 + 1):
     for letter in range(ord('a'), ord('h') + 1):
-        _squares += f" {chr(letter)}{str(number)}"
+        _squares += f"{chr(letter)}{str(number)} "
 
+# noinspection PyArgumentList
 Square = Enum("Square", _squares)
 
 @property
@@ -20,6 +21,8 @@ def file_of_square(self: Square) -> int:
 
 
 setattr(Square, 'rank', rank_of_square)
-Square.rank.__doc__ = "rank() -> int\n Which rank (row) square is in"
+# noinspection PyUnresolvedReferences
+Square.rank.__doc__ = "rank() -> int\n Which rank (row) square is in."
 setattr(Square, 'file', file_of_square)
-Square.file.__doc__ = "file() -> int\n Which file (col) square is in"
+# noinspection PyUnresolvedReferences
+Square.file.__doc__ = "file() -> int\n Which file (col) square is in."

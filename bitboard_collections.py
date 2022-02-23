@@ -102,8 +102,8 @@ class SpecialMoveBitboards(NamedTuple):
         rooks:Bitboard = self.castling_rooks
 
         # Test ep squares
-        if ((move.frm.rank() == 2 and move.to.rank() == 4) or (move.frm.rank() == 7 and move.to.rank() == 5)) and Bitboard.from_square(move.frm)&chess_bitboards.pawns:
-            ep = Bitboard.from_square( Square( ((move.frm.rank() + move.to.rank()) / 2 - 1) * 8 + move.frm.file()))
+        if ((move.frm.rank == 2 and move.to.rank == 4) or (move.frm.rank == 7 and move.to.rank == 5)) and Bitboard.from_square(move.frm)&chess_bitboards.pawns:
+            ep = Bitboard.from_square( Square( ((move.frm.rank + move.to.rank) / 2 - 1) * 8 + move.frm.file))
 
         # Test if kings have moved
         if kings and (move.frm==Square(5) or move.frm==Square(61)):
