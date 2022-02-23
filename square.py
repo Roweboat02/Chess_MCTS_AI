@@ -12,12 +12,12 @@ Square = Enum("Square", _squares)
 @property
 def rank_of_square(self: Square) -> int:
     """Which rank (row) square is in"""
-    return (self.value // 8) + 1
+    return ((self.value-1) // 8) + 1
 
 @property
 def file_of_square(self: Square) -> int:
     """Which file (col) square is in"""
-    return self.value % 8
+    return ((self.value - 1) % 8) + 1
 
 
 setattr(Square, 'rank', rank_of_square)
