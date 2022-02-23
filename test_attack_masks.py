@@ -2,15 +2,6 @@ from unittest import TestCase
 from attack_masks import *
 
 class TestAttackMasks(TestCase):
-    def test_square_distance(self):
-        self.fail()
-
-    def test_sliding_moves(self):
-        self.fail()
-
-    def test_step_moves(self):
-        self.fail()
-
     def test_pawn_attacks(self):
         a2:Square = Square.a2
         white_a2:Bitboard = Bitboard.from_square(Square.b3)
@@ -55,10 +46,29 @@ class TestAttackMasks(TestCase):
         self.assertEqual(e4_moves, king_moves(e4))
 
     def test_rank_moves(self):
-        self.fail()
+        d5:Square = Square.d5
+        d5_moves:Bitboard = Bitboard.from_rank(5) & ~Bitboard.from_square(d5)
+        d5_occupied:Bitboard = Bitboard(0)
+
+        self.assertEqual(d5_moves, rank_moves(d5, d5_occupied))
+
+        a1:Square = Square.a1
+        a1_occupied:Bitboard = Bitboard.from_square(Square.f1)
+        a1_moves:Bitboard = Bitboard.from_rank(1) & ~(Bitboard.from_square(Square.g1) | Bitboard.from_square(Square.h1) | Bitboard.from_square(a1))
+        self.assertEqual(a1_moves, rank_moves(a1, a1_occupied))
+
 
     def test_file_moves(self):
-        self.fail()
+        d5: Square = Square.d5
+        d5_moves: Bitboard = Bitboard.from_file(4) & ~Bitboard.from_square(d5)
+        d5_occupied: Bitboard = Bitboard(0)
+
+        self.assertEqual(d5_moves, file_moves(d5, d5_occupied))
+
+        a1: Square = Square.a1
+        a1_occupied: Bitboard = Bitboard.from_square(Square.a7)
+        a1_moves: Bitboard = Bitboard.from_file(1) & ~(Bitboard.from_square(Square.a8) | Bitboard.from_square(a1))
+        self.assertEqual(a1_moves, file_moves(a1, a1_occupied))
 
     def test_diagonal_moves(self):
         self.fail()

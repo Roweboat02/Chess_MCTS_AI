@@ -20,13 +20,13 @@ def sliding_moves(square: Square, occupied: Bitboard, deltas: Iterable[int]) -> 
     """
     moves: Bitboard = Bitboard(0)
     for delta in deltas:
-        sqr: Square = square
+        sqr: int = square.value
         while True:
             sqr += delta
-            if (0 < sqr <= 64) or square_distance(sqr, sqr - delta) > 2:
+            if (not (0 < sqr <= 64)) or (square_distance(Square(sqr), Square(sqr - delta)) > 2):
                 break
-            moves |= sqr
-            if occupied & Bitboard.from_square(sqr):
+            moves |= Bitboard.from_square(Square(sqr))
+            if occupied & Bitboard.from_square(Square(sqr)):
                 break
     return moves
 
