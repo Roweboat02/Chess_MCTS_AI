@@ -10,24 +10,22 @@ Last Modified: 2022/02/23
 """
 from __future__ import annotations
 
-import itertools
 from functools import cached_property
-from typing import List, Iterator
-
 from random import choice as rand_choice
+from typing import List, Generator
 
 import numpy as np
 
-from fog_of_war.bitboard_collections import Bitboard, ChessBitboards, SpecialMoveBitboards
+from fog_of_war.attack_masks import piece_move_mask, pawn_attack_mask
+from fog_of_war.chess_bitboards import Bitboard, ChessBitboards
+from fog_of_war.special_move_bitboards import SpecialMoveBitboards
 from fog_of_war.helper_functions import \
     reverse_scan_for_square, \
     reduce_with_bitwise_or, \
     reverse_scan_for_mask
-
 from fog_of_war.move import Move
 from fog_of_war.piece import Piece
 from fog_of_war.square import Square
-from fog_of_war.attack_masks import piece_move_mask, pawn_attack_mask
 
 
 def apply_fog(board: np.ndarray, fog: np.ndarray) -> np.ndarray:
@@ -128,7 +126,9 @@ class FOWChess:
         return FOWChess(
             bitboards=self.bitboards.make_move(move),
             turn=not self.current_turn,
-            special_moves=self.special_moves.update(self.bitboards, move))
+            special_moves=self.special_moves.update(self.bitboards, move),
+            half_move=self.half_move_counter+1
+        )
 
     def make_random_move(self) -> FOWChess:
         """Make a randomly chosen move from the list of possible moves"""
@@ -232,7 +232,7 @@ class FOWChess:
             king_moves(square) & king_attackers,
             knight_moves(square) & knight_attackers))
 
-    def possible_moves_generator(self) -> Iterator[Move]:
+    def possible_moves_generator(self) -> Generator[Move]:
         """List of possible moves the current player can legally make."""
         our_pieces: Bitboard = self._occupied_by_color(self.current_turn)
         their_pieces: Bitboard = self._occupied_by_color(not self.current_turn)
@@ -266,7 +266,7 @@ class FOWChess:
 
             # Try for king side castle
             if (self.special_moves.castling_kings & our_pieces
-                    and self.special_moves.kingside_castling & our_pieces
+                    and self.special_moves.king_side_castling & our_pieces
                     and ~everyones_pieces & (f_mask | g_mask)
                     and not any(self._anyone_attacking(square_mask)
                                 for square_mask in (our_king_mask, f_mask, g_mask))):
@@ -276,7 +276,7 @@ class FOWChess:
                            rook_frm=Square(h_mask.bit_length()))
             # Try for queen side
             if (self.special_moves.castling_kings & our_pieces
-                    and self.special_moves.queenside_castling & our_pieces
+                    and self.special_moves.queen_side_castling & our_pieces
                     and ~everyones_pieces & (b_mask | c_mask | d_mask)
                     and not any(self._anyone_attacking(square)
                                 for square in (our_king_mask, c_mask, d_mask))):

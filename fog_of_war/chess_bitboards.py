@@ -3,14 +3,16 @@
 # Or using "self" as a namedtuple
 # pylint: disable=E1136, E1133
 """
-bitboard_collections.py
-NamedTuples holding related bitboards.
+chess_bitboards.py
+ChessBitboards hold piece and color bitboards for a chess game.
 
 Author: Noah Rowe
 Date: 2022/02/22
     Was part of bitboards.py
-Last Modified: 2022/02/23
-    Added docstrings
+Modified
+    2022/02/23 - Added docstrings
+    2022/02/24 - moved special move bitboards into its own file
+            and renamed this one from bitboard_collections chess_bitboards
 """
 from __future__ import annotations
 
@@ -121,66 +123,3 @@ class ChessBitboards(NamedTuple):
                 cpy[abs(move.promotion_to.value) + 1] ^ move.to.value
         )
         return ChessBitboards(*cpy)
-
-
-class SpecialMoveBitboards(NamedTuple):
-    """
-    NamedTuple subclass,
-    holding bitboards which are used for determining special move rights.
-
-    Special moves includes castling and ep_rights.
-    """
-    castling_rooks: Bitboard
-    castling_kings: Bitboard
-    ep_bitboard: Bitboard
-
-    @property
-    def queenside_castling(self):
-        """Queenside rooks who are still able to castle"""
-        return self.castling_rooks & Bitboard.from_file(1)
-
-    @property
-    def kingside_castling(self):
-        """Kingside rooks who are still able to castle"""
-        return self.castling_rooks & Bitboard.from_file(8)
-
-    @classmethod
-    def new_game(cls) -> SpecialMoveBitboards:
-        """Alternate constructor for the SpecialMoveBitboards of a new game"""
-        return cls(
-            castling_rooks=Bitboard.from_square(Square.a1)
-                           | Bitboard.from_square(Square.h1)
-                           | Bitboard.from_square(Square.a8)
-                           | Bitboard.from_square(Square.h8),
-
-            castling_kings=Bitboard.from_square(Square.e1)
-                           | Bitboard.from_square(Square.e8),
-
-            ep_bitboard=Bitboard(0)
-        )
-
-    def update(self, chess_bitboards: ChessBitboards, move: Move) -> SpecialMoveBitboards:
-        """
-        Given the current board and the move being made,
-        determine the new state of special moves
-        """
-        ep_sqr: Bitboard = Bitboard(0)
-        kings: Bitboard = self.castling_kings
-        rooks: Bitboard = self.castling_rooks
-
-        # Test ep squares
-        if Bitboard.from_square(move.frm) & chess_bitboards.pawns and (
-                (move.frm.rank == 2 and move.to.rank == 4)
-                or (move.frm.rank == 7 and move.to.rank == 5)):
-            ep_sqr = Bitboard.from_square(
-                Square(((move.frm.rank + move.to.rank) / 2 - 1) * 8 + move.frm.file))
-
-        # Test if kings have moved
-        if kings and move.frm in {Square.e1, Square.e8}:
-            kings = kings & ~Bitboard.from_square(move.frm)
-
-        # Test if rooks have moved
-        if rooks and move.frm in {Square.a1, Square.a8, Square.h1, Square.h8}:
-            rooks = rooks & ~Bitboard.from_square(move.frm)
-
-        return SpecialMoveBitboards(rooks, kings, ep_sqr)

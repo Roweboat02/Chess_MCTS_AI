@@ -13,7 +13,7 @@ from unittest import TestCase
 
 from fog_of_war import reduce_with_bitwise_or
 from fog_of_war.bitboard import Bitboard
-from fog_of_war.bitboard_collections import ChessBitboards
+from fog_of_war.chess_bitboards import ChessBitboards
 from fog_of_war.move import Move
 from fog_of_war.piece import Piece
 from fog_of_war.square import Square

@@ -10,7 +10,7 @@ Last Modified: 2022/02/23
 from unittest import TestCase
 
 from fog_of_war.bitboard import Bitboard
-from fog_of_war.bitboard_collections import ChessBitboards, SpecialMoveBitboards
+from fog_of_war.chess_bitboards import ChessBitboards, SpecialMoveBitboards
 from fog_of_war.move import Move
 from fog_of_war.square import Square
 
