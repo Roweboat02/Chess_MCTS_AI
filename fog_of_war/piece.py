@@ -1,3 +1,4 @@
+# pylint: disable=C0103
 """
 piece.py
 Enum for representing chess pieces.

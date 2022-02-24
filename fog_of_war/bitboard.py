@@ -11,7 +11,7 @@ Last Modified: 2022/02/23
 
 from __future__ import annotations
 import numpy as np
-from square import Square
+from fog_of_war.square import Square
 
 class Bitboard(int):
     """

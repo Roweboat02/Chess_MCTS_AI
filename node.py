@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from typing import List
 
-import fog_of_war_chess as fow
-import move as mv
+from fog_of_war import move as mv, fog_of_war_chess as fow
 
 
 class Node:

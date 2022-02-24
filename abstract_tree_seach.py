@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from math import sqrt, log
 import random
 
-from fog_of_war_chess import FOWChess
+from fog_of_war.fog_of_war_chess import FOWChess
 from node import Node
 
 

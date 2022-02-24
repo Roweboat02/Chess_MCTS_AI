@@ -10,8 +10,8 @@ Last Modified: 2022/02/23
 from dataclasses import dataclass
 from typing import Optional
 
-from square import Square
-from piece import Piece
+from fog_of_war.square import Square
+from fog_of_war.piece import Piece
 
 @dataclass
 class Move:

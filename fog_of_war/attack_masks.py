@@ -9,10 +9,10 @@ Last Modified: 2022/02/23
 """
 from typing import Iterable
 
-from bitboard import Bitboard
-from helper_functions import reduce_with_bitwise_or
-from piece import Piece
-from square import Square
+from fog_of_war.bitboard import Bitboard
+from fog_of_war.helper_functions import reduce_with_bitwise_or
+from fog_of_war.piece import Piece
+from fog_of_war.square import Square
 
 
 def square_distance(square_a: Square, square_b: Square) -> int:
@@ -44,11 +44,11 @@ def step_moves(square: Square, deltas: Iterable[int]) -> Bitboard:
     """
     Generate bitboard of square+deltas, if resultant is within bitboard range and doesn't wrap board
     """
-    return reduce_with_bitwise_or(Bitboard.from_square(Square(square.value + delta))
+    return reduce_with_bitwise_or(*(Bitboard.from_square(Square(square.value + delta))
                                   if (0 < square.value + delta <= 64)
                                   and 2 >= square_distance(square, Square(square.value + delta))
                                   else Bitboard(0)
-                                  for delta in deltas)
+                                  for delta in deltas))
 
 
 def pawn_attack_mask(square: Square, color: bool) -> Bitboard:
