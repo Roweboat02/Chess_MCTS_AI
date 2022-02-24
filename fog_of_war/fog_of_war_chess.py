@@ -234,6 +234,13 @@ class FOWChess:
 
     def possible_moves_generator(self) -> Generator[Move]:
         """List of possible moves the current player can legally make."""
+
+        # 'Best practice' calls for this to be made into a billion little functions
+        # But honestly I think making a bunch of little functions just to use them here
+        # is less readable and takes more time than this huge massive one.
+        # And they're all pretty specialized,
+        # so it's not like they'll be reused anywhere other than in visible_squares.
+
         our_pieces: Bitboard = self._occupied_by_color(self.current_turn)
         their_pieces: Bitboard = self._occupied_by_color(not self.current_turn)
         everyones_pieces: Bitboard = our_pieces | their_pieces
@@ -341,8 +348,14 @@ class FOWChess:
     def _visible_squares(self, color: bool) -> Bitboard:
         """
         Generate a bitboard of squares which should be visible to the @param color
-         (where True is white and black is False)
+        (where True is white and black is False)
         """
+        # 'Best practice' calls for this to be made into a billion little functions
+        # But honestly I think making a bunch of little functions just to use them here
+        # is less readable and takes more time than this huge massive one.
+        # And they're all pretty specialized,
+        # so it's not like they'll be reused anywhere other than in possible_move_generator.
+
         visible: Bitboard = Bitboard(0)
 
         our_pieces: Bitboard = Bitboard(self._occupied_by_color(color))
