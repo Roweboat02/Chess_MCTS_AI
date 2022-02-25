@@ -94,7 +94,6 @@ class ChessBitboards(NamedTuple):
             def search(current_bb: Bitboard,
                        frm_mask: Bitboard,
                        to_mask: Bitboard):
-                # TODO: Unit test this better
                 if current_bb & to_mask:
                     # If the to square is already set in a BB, we're capturing, Therefore clear it
                     current_bb ^= to_mask

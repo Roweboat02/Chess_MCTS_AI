@@ -35,7 +35,9 @@ def apply_fog(board: np.ndarray, fog: np.ndarray) -> np.ndarray:
     @return foggy_board: 8x8 numpy array representing a chess board with fog applied.
     """
     # This is a bit dumb, but I dunno
-    return np.clip(board + np.logical_not(fog.copy()) * 20, -16, 15)
+    foggy_board: np.ndarray = board.copy()
+    foggy_board[np.logical_not(fog)] = 15
+    return foggy_board
 
 
 class FOWChess:
@@ -57,7 +59,10 @@ class FOWChess:
         self.__half_move: int = half_move
 
     def __hash__(self) -> int:
-        return (*self.__bitboards, *self.__special, self.__current_turn, self.__half_move).__hash__()
+        return (*self.__bitboards,
+                *self.__special,
+                self.__current_turn,
+                self.__half_move).__hash__()
 
     def __eq__(self, other: FOWChess) -> bool:
         return (self.bitboards == other.bitboards
@@ -213,7 +218,11 @@ class FOWChess:
         determine if anyone is attacking square.
         """
         square: Square = Square(square_mask.bit_length())
-        from fog_of_war.attack_masks import rank_moves, file_moves, diagonal_moves, king_moves, knight_moves
+        from fog_of_war.attack_masks import rank_moves,\
+            file_moves,\
+            diagonal_moves,\
+            king_moves,\
+            knight_moves
 
         occupied = self.bitboards.black | self.bitboards.white
         their_pieces = self._occupied_by_color(not self.current_turn)

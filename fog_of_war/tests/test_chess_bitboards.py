@@ -141,4 +141,4 @@ class TestChessBitboards(TestCase):
         self.assertIsNone(result.piece_at(Square.a2))
         self.assertEqual(Piece.P, result.piece_at(Square.a4))
         self.assertEqual(move_a2_pawn_forward, result)
-    # TODO: Test promotions and castling
+    # TODO: Test promotions
