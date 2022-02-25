@@ -378,9 +378,9 @@ class TestFOWChess(TestCase):
 
     def test_board_as_numpy(self):
         """Test the conversion to a numpy array representation is as expected"""
-        self.assertTrue(np.equal(FOWChess.new_game().board_as_numpy, self.new_game_numpy))
-        self.assertTrue(np.equal(self.white_move_board.board_as_numpy, self.white_move_numpy))
-        self.assertTrue(np.equal(self.black_move_board.board_as_numpy, self.black_move_numpy))
+        self.assertTrue(np.equal(FOWChess.new_game().board_as_numpy, self.new_game_numpy).all())
+        self.assertTrue(np.equal(self.white_move_board.board_as_numpy, self.white_move_numpy).all())
+        self.assertTrue(np.equal(self.black_move_board.board_as_numpy, self.black_move_numpy).all())
 
     def test_black_board(self):
         """Test the conversion to a numpy array representation, from black's POV is as expected"""
@@ -463,9 +463,6 @@ class TestFOWChess(TestCase):
         self.black_move_numpy[2] = [0, 15, 15, 15, 15, 15, 15, 15]
         self.black_move_numpy[3] = [15, 0, 15, -1, 0, 15, 15, 0]
         self.black_move_numpy[5] = [0, 0, 0, 0, 15, 0, 0, 0]
-        print(self.black_move_numpy)
-        print('\n')
-        print(self.black_move_board.white_foggy_board)
         self.assertTrue(
                 np.equal(
                         self.black_move_numpy,
