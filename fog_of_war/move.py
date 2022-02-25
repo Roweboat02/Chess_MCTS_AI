@@ -13,7 +13,8 @@ from typing import Optional
 from fog_of_war.square import Square
 from fog_of_war.piece import Piece
 
-@dataclass
+
+@dataclass(frozen=True)
 class Move:
     """
     Use to and frm to specify a chess move.
@@ -28,8 +29,8 @@ class Move:
      specify where the rook moves to and from using rook_to and rook_frm
      (both rook_to and rook_frm are None by default)
     """
-    to:Square
-    frm:Square
+    to: Square
+    frm: Square
     rook_to: Optional[Square] = None
     rook_frm: Optional[Square] = None
     promotion_to: Optional[Piece] = None

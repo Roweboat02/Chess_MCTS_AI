@@ -20,6 +20,7 @@ from fog_of_war.move import Move
 from fog_of_war.bitboard import Bitboard
 from fog_of_war.chess_bitboards import ChessBitboards
 
+
 class SpecialMoveBitboards(NamedTuple):
     """
     NamedTuple subclass,
@@ -77,7 +78,10 @@ class SpecialMoveBitboards(NamedTuple):
             kings = kings & ~Bitboard.from_square(move.frm)
 
         # Test if rooks have moved
-        if rooks and move.frm in {Square.a1, Square.a8, Square.h1, Square.h8}:
-            rooks = rooks & ~Bitboard.from_square(move.frm)
+        if rooks:
+            if move.rook_frm is not None:
+                rooks = rooks & ~Bitboard.from_square(move.rook_frm)
+            elif move.frm in {Square.a1, Square.a8, Square.h1, Square.h8}:
+                rooks = rooks & ~Bitboard.from_square(move.frm)
 
         return SpecialMoveBitboards(rooks, kings, ep_sqr)

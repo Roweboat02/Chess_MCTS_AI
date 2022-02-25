@@ -61,9 +61,6 @@ class TestChessBitboards(TestCase):
 
     def test_new_game(self):
         """Test i alt constructor for a new game is correct"""
-        print(bin(ChessBitboards.new_game().queens))
-        print(bin(self.new_game.queens))
-
         self.assertEqual(ChessBitboards.new_game(), self.new_game)
 
     def test_piece_at(self):

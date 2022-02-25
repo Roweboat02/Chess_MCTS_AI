@@ -17,20 +17,15 @@ from fog_of_war.square import Square
 
 def reduce_with_bitwise_or(*args: Bitboard) -> Bitboard:
     """Bitwise-or all BBs in given iterable. Return resulting bitboard."""
-    return Bitboard(reduce(lambda x, y: x | y, args))
+    try:
+        return Bitboard(reduce(lambda x, y: x | y, args))
+    except TypeError:
+        return Bitboard(0)
 
 
 def reverse_scan_for_square(bitboard: Bitboard) -> Iterable[Square]:
     """Generator yielding all bit position numbers in the given bitboard."""
     while bitboard:
-        length: int = bitboard.bit_length() - 1
+        length: int = bitboard.bit_length()
         yield Square(length)
-        bitboard ^= 1 << length
-
-
-def reverse_scan_for_mask(bitboard: Bitboard) -> Iterable[Bitboard]:
-    """Generator yielding all bit position numbers in the given bitboard."""
-    while bitboard:
-        length: int = bitboard.bit_length() - 1
-        yield length
-        bitboard ^= 1 << length
+        bitboard ^= 1 << (length-1)

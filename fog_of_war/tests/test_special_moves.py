@@ -10,7 +10,8 @@ Last Modified: 2022/02/23
 from unittest import TestCase
 
 from fog_of_war.bitboard import Bitboard
-from fog_of_war.chess_bitboards import ChessBitboards, SpecialMoveBitboards
+from fog_of_war.chess_bitboards import ChessBitboards
+from fog_of_war.special_move_bitboards import SpecialMoveBitboards
 from fog_of_war.move import Move
 from fog_of_war.square import Square
 
@@ -40,11 +41,11 @@ class TestSpecialMoveBitboards(TestCase):
 
     def test_queen_side_castling(self):
         """Test if queen side property is working"""
-        self.assertEqual(self.queens_side_rooks, self.new_game.queenside_castling)
+        self.assertEqual(self.queens_side_rooks, self.new_game.queen_side_castling)
 
     def test_king_side_castling(self):
         """Test if king side property is working"""
-        self.assertEqual(self.kings_side_rooks, self.new_game.kingside_castling)
+        self.assertEqual(self.kings_side_rooks, self.new_game.king_side_castling)
 
     def test_update_white_ep(self):
         """

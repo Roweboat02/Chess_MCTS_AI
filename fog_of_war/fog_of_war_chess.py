@@ -21,8 +21,7 @@ from fog_of_war.chess_bitboards import Bitboard, ChessBitboards
 from fog_of_war.special_move_bitboards import SpecialMoveBitboards
 from fog_of_war.helper_functions import \
     reverse_scan_for_square, \
-    reduce_with_bitwise_or, \
-    reverse_scan_for_mask
+    reduce_with_bitwise_or
 from fog_of_war.move import Move
 from fog_of_war.piece import Piece
 from fog_of_war.square import Square
@@ -60,6 +59,12 @@ class FOWChess:
     def __hash__(self) -> int:
         return (*self.__bitboards, *self.__special, self.__current_turn, self.__half_move).__hash__()
 
+    def __eq__(self, other: FOWChess) -> bool:
+        return (self.bitboards == other.bitboards
+                and self.special_moves == other.special_moves
+                and self.current_turn == other.current_turn
+                and self.half_move_counter == other.half_move_counter)
+
     @classmethod
     def new_game(cls) -> FOWChess:
         """
@@ -78,8 +83,9 @@ class FOWChess:
         Create a new fow game state,
         by applying a move to an existing fow game state
         """
+        new_bitboards: ChessBitboards = parent.bitboards.make_move(move)
         return cls(
-            bitboards=parent.bitboards.make_move(move),
+            bitboards=new_bitboards,
             turn=not parent.current_turn,
             special_moves=parent.special_moves.update(parent.bitboards, move),
             half_move=parent.half_move_counter + 1
@@ -123,12 +129,7 @@ class FOWChess:
 
     def make_move(self, move: Move) -> FOWChess:
         """Given a move, create a FOWChess node where that move has been made."""
-        return FOWChess(
-            bitboards=self.bitboards.make_move(move),
-            turn=not self.current_turn,
-            special_moves=self.special_moves.update(self.bitboards, move),
-            half_move=self.half_move_counter+1
-        )
+        return FOWChess.from_fow(self, move)
 
     def make_random_move(self) -> FOWChess:
         """Make a randomly chosen move from the list of possible moves"""
@@ -137,7 +138,7 @@ class FOWChess:
     @cached_property
     def is_over(self) -> bool:  # TODO: better termination checks
         """True if 1 king left on board"""
-        return len(list(reverse_scan_for_mask(self.bitboards.kings))) == 1
+        return len(list(reverse_scan_for_square(self.bitboards.kings))) == 1
 
     @cached_property
     def winner(self) -> bool | None:  # maybe make this a class
@@ -158,15 +159,15 @@ class FOWChess:
         See Piece enum for encoding
         """
         return (
-                       self.bitboards.kings.bitboard_to_numpy() * Piece['K'].value
-                       + self.bitboards.queens.bitboard_to_numpy() * Piece['Q'].value
-                       + self.bitboards.pawns.bitboard_to_numpy() * Piece['P'].value
-                       + self.bitboards.rooks.bitboard_to_numpy() * Piece['R'].value
-                       + self.bitboards.bishops.bitboard_to_numpy() * Piece['B'].value
-                       + self.bitboards.knights.bitboard_to_numpy() * Piece['N'].value
+                       Bitboard(self.bitboards.kings).bitboard_to_numpy() * Piece['K'].value
+                       + Bitboard(self.bitboards.queens).bitboard_to_numpy() * Piece['Q'].value
+                       + Bitboard(self.bitboards.pawns).bitboard_to_numpy() * Piece['P'].value
+                       + Bitboard(self.bitboards.rooks).bitboard_to_numpy() * Piece['R'].value
+                       + Bitboard(self.bitboards.bishops).bitboard_to_numpy() * Piece['B'].value
+                       + Bitboard(self.bitboards.knights).bitboard_to_numpy() * Piece['N'].value
                ) * (
-                       self.bitboards.black.bitboard_to_numpy() * -1
-                       + self.bitboards.white.bitboard_to_numpy()
+                       Bitboard(self.bitboards.black).bitboard_to_numpy() * -1
+                       + Bitboard(self.bitboards.white).bitboard_to_numpy()
                )
 
     @cached_property
@@ -181,24 +182,24 @@ class FOWChess:
         return self.board_as_numpy
 
     @cached_property
-    def black_fog(self) -> np.ndarray:
+    def visible_to_black(self) -> np.ndarray:
         """Numpy array representation of black's fog, where black is on bottom"""
-        return np.flip(self._visible_squares(False).bitboard_to_numpy(), 0)
+        return np.flipud(self._visible_squares(False).bitboard_to_numpy())
 
     @cached_property
-    def white_fog(self) -> np.ndarray:
+    def visible_to_white(self) -> np.ndarray:
         """Numpy array representation of white's fog, where white is on bottom"""
         return self._visible_squares(True).bitboard_to_numpy()
 
     @cached_property
     def white_foggy_board(self) -> np.ndarray:
         """Numpy array representation of board with white's fog applied, where white is on bottom"""
-        return apply_fog(self.white_board, self.white_fog)
+        return apply_fog(self.white_board, self.visible_to_white)
 
     @cached_property
     def black_foggy_board(self) -> np.ndarray:
         """Numpy array representation of board with black's fog applied, where black is on bottom"""
-        return apply_fog(self.black_board, self.black_fog)
+        return apply_fog(self.black_board, self.visible_to_black)
 
     def _occupied_by_color(self, color: bool) -> Bitboard:
         """White's bitboard if True, black's if False"""
@@ -212,7 +213,7 @@ class FOWChess:
         determine if anyone is attacking square.
         """
         square: Square = Square(square_mask.bit_length())
-        from attack_masks import rank_moves, file_moves, diagonal_moves, king_moves, knight_moves
+        from fog_of_war.attack_masks import rank_moves, file_moves, diagonal_moves, king_moves, knight_moves
 
         occupied = self.bitboards.black | self.bitboards.white
         their_pieces = self._occupied_by_color(not self.current_turn)
@@ -252,6 +253,7 @@ class FOWChess:
                     piece_move_mask(frm_sqr, self.bitboards.piece_at(frm_sqr), everyones_pieces)
             ):
                 yield Move(to=to_sqr, frm=frm_sqr)
+
 
         # check for castling
         if (self.special_moves.castling_kings & our_pieces
@@ -302,26 +304,29 @@ class FOWChess:
                     yield Move(to_sqr, frm_sqr)
 
             backrank: Bitboard
+            forward_or_back: int
             # Then find their single and double moves
-            if self.current_turn == self.WHITE:
+            if self.current_turn:
                 single_moves = (pawns << 8) & ~everyones_pieces
                 double_moves = (single_moves << 8
                                 & Bitboard.from_rank(4)
                                 & ~everyones_pieces)
                 backrank = Bitboard.from_rank(1)
+                forward_or_back = -1
             else:
                 single_moves = pawns >> 8 & ~everyones_pieces
                 double_moves = (
                         single_moves >> 8
-                        & Bitboard.from_rank(6)
+                        & Bitboard.from_rank(5)
                         & ~everyones_pieces)
                 backrank = Bitboard.from_rank(8)
+                forward_or_back = 1
 
             for to_sqr in reverse_scan_for_square(single_moves):
-                yield Move(to_sqr, Square(to_sqr.value - 8))
+                yield Move(to_sqr, Square(to_sqr.value + (8 * forward_or_back)))
 
             for to_sqr in reverse_scan_for_square(double_moves):
-                yield Move(to_sqr, Square(to_sqr.value - 16))
+                yield Move(to_sqr, Square(to_sqr.value + (16 * forward_or_back)))
 
             # promotion
             if backrank & pawns:
@@ -347,7 +352,7 @@ class FOWChess:
 
     def _visible_squares(self, color: bool) -> Bitboard:
         """
-        Generate a bitboard of squares which should be visible to the @param color
+        Generate a bitboard of squares which should not be visible to the @param color
         (where True is white and black is False)
         """
         # 'Best practice' calls for this to be made into a billion little functions
@@ -387,7 +392,7 @@ class FOWChess:
 
             else:
                 single_moves = pawns >> 8 & ~everyones_pieces
-                double_moves = single_moves >> 8 & Bitboard.from_rank(6) & ~everyones_pieces
+                double_moves = single_moves >> 8 & Bitboard.from_rank(5) & ~everyones_pieces
             visible |= single_moves | double_moves
 
             # Finally, check if an en passant is available
@@ -396,7 +401,7 @@ class FOWChess:
                              & self.special_moves.ep_bitboard)):
                 ep_square: Square = Square(self.special_moves.ep_bitboard.bit_length())
                 visible |= reduce_with_bitwise_or(
-                    *(frm for frm in reverse_scan_for_mask(
+                    *(Bitboard.from_square(frm_sqr) for frm_sqr in reverse_scan_for_square(
                         pawn_attack_mask(ep_square, not self.current_turn) & pawns)))
 
         return Bitboard(visible)

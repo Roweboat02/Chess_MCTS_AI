@@ -83,8 +83,8 @@ class ChessBitboards(NamedTuple):
             queens=(Bitboard.from_square(Square.d1)
                     | Bitboard.from_square(Square.d8)),
 
-            kings=Bitboard.from_square(Square.e8)
-                  | Bitboard.from_square(Square.e1)
+            kings=(Bitboard.from_square(Square.e8)
+                  | Bitboard.from_square(Square.e1))
         )
 
     def make_move(self: ChessBitboards, move: Move) -> ChessBitboards:
