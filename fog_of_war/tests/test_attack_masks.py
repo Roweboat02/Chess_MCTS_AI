@@ -17,7 +17,7 @@ from fog_of_war.attack_masks import pawn_attack_mask,\
     rank_moves,\
     file_moves,\
     diagonal_moves, \
-    piece_move_mask
+    non_pawn_move_mask
 from fog_of_war.square import Square
 from fog_of_war.bitboard import Bitboard
 
@@ -201,17 +201,17 @@ class TestAttackMasks(TestCase):
                                                                           Square.d2,
                                                                           Square.d1]))
 
-        self.assertEqual(rook, piece_move_mask(on_c2, Piece.r, Bitboard(0)))
-        self.assertEqual(rook, piece_move_mask(on_c2, Piece.R, Bitboard(0)))
+        self.assertEqual(rook, non_pawn_move_mask(on_c2, Piece.r, Bitboard(0)))
+        self.assertEqual(rook, non_pawn_move_mask(on_c2, Piece.R, Bitboard(0)))
 
-        self.assertEqual(bishop, piece_move_mask(on_c2, Piece.b, Bitboard(0)))
-        self.assertEqual(bishop, piece_move_mask(on_c2, Piece.B, Bitboard(0)))
+        self.assertEqual(bishop, non_pawn_move_mask(on_c2, Piece.b, Bitboard(0)))
+        self.assertEqual(bishop, non_pawn_move_mask(on_c2, Piece.B, Bitboard(0)))
 
-        self.assertEqual(knight, piece_move_mask(on_c2, Piece.n, Bitboard(0)))
-        self.assertEqual(knight, piece_move_mask(on_c2, Piece.N, Bitboard(0)))
+        self.assertEqual(knight, non_pawn_move_mask(on_c2, Piece.n, Bitboard(0)))
+        self.assertEqual(knight, non_pawn_move_mask(on_c2, Piece.N, Bitboard(0)))
 
-        self.assertEqual(queen, piece_move_mask(on_c2, Piece.q, Bitboard(0)))
-        self.assertEqual(queen, piece_move_mask(on_c2, Piece.Q, Bitboard(0)))
+        self.assertEqual(queen, non_pawn_move_mask(on_c2, Piece.q, Bitboard(0)))
+        self.assertEqual(queen, non_pawn_move_mask(on_c2, Piece.Q, Bitboard(0)))
 
-        self.assertEqual(king, piece_move_mask(on_c2, Piece.k, Bitboard(0)))
-        self.assertEqual(king, piece_move_mask(on_c2, Piece.K, Bitboard(0)))
+        self.assertEqual(king, non_pawn_move_mask(on_c2, Piece.k, Bitboard(0)))
+        self.assertEqual(king, non_pawn_move_mask(on_c2, Piece.K, Bitboard(0)))

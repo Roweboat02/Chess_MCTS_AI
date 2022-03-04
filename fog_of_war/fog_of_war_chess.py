@@ -16,7 +16,7 @@ from typing import List, Generator
 
 import numpy as np
 
-from fog_of_war.attack_masks import piece_move_mask, pawn_attack_mask
+from fog_of_war.attack_masks import non_pawn_move_mask, pawn_attack_mask
 from fog_of_war.chess_bitboards import Bitboard, ChessBitboards
 from fog_of_war.special_move_bitboards import SpecialMoveBitboards
 from fog_of_war.helper_functions import \
@@ -259,7 +259,7 @@ class FOWChess:
         for frm_sqr in reverse_scan_for_square(our_pieces & ~self.bitboards.pawns):
             for to_sqr in reverse_scan_for_square(
                     ~our_pieces &
-                    piece_move_mask(frm_sqr, self.bitboards.piece_at(frm_sqr), everyones_pieces)
+                    non_pawn_move_mask(frm_sqr, self.bitboards.piece_at(frm_sqr), everyones_pieces)
             ):
                 yield Move(to=to_sqr, frm=frm_sqr)
 
@@ -380,7 +380,7 @@ class FOWChess:
 
         # Generate non-pawn moves.
         piece_moves = reduce_with_bitwise_or(
-            *(piece_move_mask(frm, self.bitboards.piece_at(frm), everyones_pieces) & ~our_pieces
+            *(non_pawn_move_mask(frm, self.bitboards.piece_at(frm), everyones_pieces) & ~our_pieces
               for frm in (reverse_scan_for_square(our_pieces & ~self.bitboards.pawns)))
         )
         visible |= piece_moves
