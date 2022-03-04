@@ -46,14 +46,14 @@ class TestBitboard(TestCase):
 
         numpy_file_8: np.ndarray = np.fliplr(numpy_file_1)
         numpy_rank_8: np.ndarray = np.flipud(numpy_rank_1)
-        self.assertTrue(np.equal(self.empty.bitboard_to_numpy(), numpy_empty).all())
-        self.assertTrue(np.equal(self.full.bitboard_to_numpy(), numpy_full).all())
+        self.assertTrue(np.equal(self.empty.to_numpy(), numpy_empty).all())
+        self.assertTrue(np.equal(self.full.to_numpy(), numpy_full).all())
 
-        self.assertTrue(np.equal(self.rank_1.bitboard_to_numpy(), numpy_rank_1).all())
-        self.assertTrue(np.equal(self.file_1.bitboard_to_numpy(), numpy_file_1).all())
+        self.assertTrue(np.equal(self.rank_1.to_numpy(), numpy_rank_1).all())
+        self.assertTrue(np.equal(self.file_1.to_numpy(), numpy_file_1).all())
 
-        self.assertTrue(np.equal(self.rank_8.bitboard_to_numpy(), numpy_rank_8).all())
-        self.assertTrue(np.equal(self.file_8.bitboard_to_numpy(), numpy_file_8).all())
+        self.assertTrue(np.equal(self.rank_8.to_numpy(), numpy_rank_8).all())
+        self.assertTrue(np.equal(self.file_8.to_numpy(), numpy_file_8).all())
 
     def test_from_rank(self):
         """Test Bitboard alternate constructor "from_rank" """

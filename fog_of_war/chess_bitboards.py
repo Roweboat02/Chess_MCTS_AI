@@ -16,7 +16,10 @@ Modified
 """
 from __future__ import annotations
 
+from functools import cached_property
 from typing import NamedTuple, List
+
+import numpy as np
 
 from fog_of_war.square import Square
 from fog_of_war.piece import Piece
@@ -37,6 +40,24 @@ class ChessBitboards(NamedTuple):
     rooks: Bitboard
     queens: Bitboard
     kings: Bitboard
+
+    @cached_property
+    def to_numpy(self) -> np.ndarray:
+        """
+        A numpy representation of the chess board, using integers.
+        See Piece enum for encoding
+        """
+        return (
+                Bitboard(self.kings).to_numpy() * Piece['K'].value
+                + Bitboard(self.queens).to_numpy() * Piece['Q'].value
+                + Bitboard(self.pawns).to_numpy() * Piece['P'].value
+                + Bitboard(self.rooks).to_numpy() * Piece['R'].value
+                + Bitboard(self.bishops).to_numpy() * Piece['B'].value
+                + Bitboard(self.knights).to_numpy() * Piece['N'].value
+               ) * (
+               Bitboard(self.black).to_numpy() * -1
+               + Bitboard(self.white).to_numpy()
+               )
 
     def piece_at(self: ChessBitboards, square: Square) -> Piece | None:
         """If a piece is at square, return its value, else return None"""

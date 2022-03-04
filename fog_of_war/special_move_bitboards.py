@@ -33,12 +33,12 @@ class SpecialMoveBitboards(NamedTuple):
     ep_bitboard: Bitboard
 
     @property
-    def queen_side_castling(self):
+    def queen_side_castling(self) -> Bitboard:
         """Queen side rooks who are still able to castle"""
         return self.castling_rooks & Bitboard.from_file(1)
 
     @property
-    def king_side_castling(self):
+    def king_side_castling(self) -> Bitboard:
         """King side rooks who are still able to castle"""
         return self.castling_rooks & Bitboard.from_file(8)
 

@@ -378,9 +378,9 @@ class TestFOWChess(TestCase):
 
     def test_board_as_numpy(self):
         """Test the conversion to a numpy array representation is as expected"""
-        self.assertTrue(np.equal(FOWChess.new_game().board_as_numpy, self.new_game_numpy).all())
-        self.assertTrue(np.equal(self.white_move_board.board_as_numpy, self.white_move_numpy).all())
-        self.assertTrue(np.equal(self.black_move_board.board_as_numpy, self.black_move_numpy).all())
+        self.assertTrue(np.equal(FOWChess.new_game().to_numpy, self.new_game_numpy).all())
+        self.assertTrue(np.equal(self.white_move_board.to_numpy, self.white_move_numpy).all())
+        self.assertTrue(np.equal(self.black_move_board.to_numpy, self.black_move_numpy).all())
 
     def test_black_board(self):
         """Test the conversion to a numpy array representation, from black's POV is as expected"""

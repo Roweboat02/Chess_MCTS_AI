@@ -14,7 +14,6 @@ from functools import cached_property
 from random import choice as rand_choice
 from typing import List, Generator
 
-import numpy as np
 
 from fog_of_war.attack_masks import non_pawn_move_mask, pawn_attack_mask
 from fog_of_war.chess_bitboards import Bitboard, ChessBitboards
@@ -25,19 +24,6 @@ from fog_of_war.helper_functions import \
 from fog_of_war.move import Move
 from fog_of_war.piece import Piece
 from fog_of_war.square import Square
-
-
-def apply_fog(board: np.ndarray, fog: np.ndarray) -> np.ndarray:
-    """
-    Apply fog to board. Fog is represented as 15.
-    @param board: 8x8 numpy array representing a chess board
-    @param fog:  8x8 numpy array representing fog over a chess board
-    @return foggy_board: 8x8 numpy array representing a chess board with fog applied.
-    """
-    # This is a bit dumb, but I dunno
-    foggy_board: np.ndarray = board.copy()
-    foggy_board[np.logical_not(fog)] = 15
-    return foggy_board
 
 
 class FOWChess:
@@ -157,55 +143,6 @@ class FOWChess:
         elif not black:
             return self.WHITE
 
-    @cached_property
-    def board_as_numpy(self) -> np.ndarray:
-        """
-        A numpy representation of the chess board, using integers.
-        See Piece enum for encoding
-        """
-        return (
-                       Bitboard(self.bitboards.kings).bitboard_to_numpy() * Piece['K'].value
-                       + Bitboard(self.bitboards.queens).bitboard_to_numpy() * Piece['Q'].value
-                       + Bitboard(self.bitboards.pawns).bitboard_to_numpy() * Piece['P'].value
-                       + Bitboard(self.bitboards.rooks).bitboard_to_numpy() * Piece['R'].value
-                       + Bitboard(self.bitboards.bishops).bitboard_to_numpy() * Piece['B'].value
-                       + Bitboard(self.bitboards.knights).bitboard_to_numpy() * Piece['N'].value
-               ) * (
-                       Bitboard(self.bitboards.black).bitboard_to_numpy() * -1
-                       + Bitboard(self.bitboards.white).bitboard_to_numpy()
-               )
-
-    @cached_property
-    def black_board(self) -> np.ndarray:
-        """Numpy array representation of board, with black on the bottom."""
-        # * -1 and mirror about 1 as well if you want it to look like white
-        return np.flip(self.board_as_numpy, 0)
-
-    @cached_property
-    def white_board(self) -> np.ndarray:
-        """Numpy array representation of board, where white is on bottom"""
-        return self.board_as_numpy
-
-    @cached_property
-    def visible_to_black(self) -> np.ndarray:
-        """Numpy array representation of black's fog, where black is on bottom"""
-        return np.flipud(self._visible_squares(False).bitboard_to_numpy())
-
-    @cached_property
-    def visible_to_white(self) -> np.ndarray:
-        """Numpy array representation of white's fog, where white is on bottom"""
-        return self._visible_squares(True).bitboard_to_numpy()
-
-    @cached_property
-    def white_foggy_board(self) -> np.ndarray:
-        """Numpy array representation of board with white's fog applied, where white is on bottom"""
-        return apply_fog(self.white_board, self.visible_to_white)
-
-    @cached_property
-    def black_foggy_board(self) -> np.ndarray:
-        """Numpy array representation of board with black's fog applied, where black is on bottom"""
-        return apply_fog(self.black_board, self.visible_to_black)
-
     def _occupied_by_color(self, color: bool) -> Bitboard:
         """White's bitboard if True, black's if False"""
         return self.bitboards.white if color else self.bitboards.black
@@ -262,7 +199,6 @@ class FOWChess:
                     non_pawn_move_mask(frm_sqr, self.bitboards.piece_at(frm_sqr), everyones_pieces)
             ):
                 yield Move(to=to_sqr, frm=frm_sqr)
-
 
         # check for castling
         if (self.special_moves.castling_kings & our_pieces
