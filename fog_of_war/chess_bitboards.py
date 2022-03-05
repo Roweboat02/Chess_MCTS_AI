@@ -108,7 +108,7 @@ class ChessBitboards(NamedTuple):
                   | Bitboard.from_square(Square.e1))
         )
 
-    def make_move(self: ChessBitboards, move: Move) -> ChessBitboards:
+    def make_move(self, move: Move) -> ChessBitboards:
         """Clear move.frm and set move.to in the same bitboard. Clear move.to"""
 
         if move.promotion_to is None:
