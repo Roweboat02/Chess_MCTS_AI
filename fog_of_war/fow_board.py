@@ -4,7 +4,6 @@ from typing import List
 import numpy as np
 
 from fog_of_war.bitboard import Bitboard
-from fog_of_war.special_move_bitboards import SpecialMoveBitboards
 from fog_of_war.move import Move
 
 
@@ -17,7 +16,6 @@ class FOWBoard:
     def __init__(self,
                  numpy_board: np.ndarray,
                  turn: bool,
-                 special: SpecialMoveBitboards,
                  visible: Bitboard,
                  possible_moves: List[Move]):
 
@@ -27,7 +25,6 @@ class FOWBoard:
         self.__foggy_board: np.ndarray = _apply_fog(board, self.__visible)
 
         self.__turn: bool = turn
-        self.__special: SpecialMoveBitboards = special
         self.__possible_moves: List[Move] = possible_moves
 
 
