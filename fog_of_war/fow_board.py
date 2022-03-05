@@ -8,38 +8,42 @@ from fog_of_war.special_move_bitboards import SpecialMoveBitboards
 from fog_of_war.move import Move
 
 
-class BiasedBoard:
+def _apply_fog(board:np.ndarray, visible:np.ndarray) -> np.ndarray:
+    foggy_board: np.ndarray = board.copy()
+    foggy_board[np.logical_not(visible)] = 15
+    return foggy_board
+
+class FOWBoard:
     def __init__(self,
                  numpy_board: np.ndarray,
                  turn: bool,
                  special: SpecialMoveBitboards,
                  visible: Bitboard,
                  possible_moves: List[Move]):
-        self.__board: np.ndarray = numpy_board
+
+        board = numpy_board if turn else np.flip(numpy_board, 0)
+        vis: np.ndarray = visible.to_numpy()
+        self.__visible: np.ndarray = vis if turn else np.flipud(vis)
+        self.__foggy_board: np.ndarray = _apply_fog(board, self.__visible)
+
         self.__turn: bool = turn
         self.__special: SpecialMoveBitboards = special
-        self.__visible: Bitboard = visible
         self.__possible_moves: List[Move] = possible_moves
 
-    def apply_fog(self) -> np.ndarray:
-        foggy_board: np.ndarray = self.__board.copy()
-        foggy_board[np.logical_not(self.visible_to_color)] = 15
-        return foggy_board
 
-    @cached_property
-    def board(self) -> np.ndarray:
+
+    @property
+    def foggy_board(self) -> np.ndarray:
         """Numpy array representation of board, with black on the bottom."""
         # * -1 and mirror about 1 as well if you want it to look like white
-        return self.__board if self.__turn else np.flip(self.__board, 0)
+        return self.__foggy_board
 
-    @cached_property
+    @property
     def visible_to_color(self) -> np.ndarray:
         """Numpy array representation of black's fog, where black is on bottom"""
-        vis: np.ndarray = self.__visible.to_numpy()
-        return vis if self.__turn else np.flipud(vis)
+        return self.__visible
 
-    @cached_property
-    def foggy_board(self) -> np.ndarray:
-        """Numpy array representation of board with white's fog applied, where white is on bottom"""
-        return self.apply_fog()
-
+    @property
+    def turn(self) -> bool:
+        """The player FOWBoard is in the persprective of"""
+        return self.__turn

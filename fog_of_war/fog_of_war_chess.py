@@ -90,7 +90,7 @@ class FOWChess:
         """
         return self.__half_move
 
-    @property
+    @cached_property
     def full_move_number(self) -> int:
         """
         What number of full move is the game currently on?
@@ -113,10 +113,10 @@ class FOWChess:
         """Bitboards representing ep and castling bitboards"""
         return self.__special
 
-    @property
+    @cached_property
     def possible_moves_list(self) -> List[Move]:
         """List of possible legal moves"""
-        return list(self.possible_moves_generator())
+        return list(self._possible_move_generator())
 
     def make_move(self, move: Move) -> FOWChess:
         """Given a move, create a FOWChess node where that move has been made."""
@@ -179,7 +179,7 @@ class FOWChess:
             king_moves(square) & king_attackers,
             knight_moves(square) & knight_attackers))
 
-    def possible_moves_generator(self) -> Generator[Move]:
+    def _possible_move_generator(self) -> Generator[Move]:
         """List of possible moves the current player can legally make."""
 
         # 'Best practice' calls for this to be made into a billion little functions
