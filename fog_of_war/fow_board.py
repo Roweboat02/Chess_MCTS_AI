@@ -3,6 +3,8 @@ from typing import List
 
 import numpy as np
 
+from fog_of_war import Piece
+from fog_of_war.square import Square
 from fog_of_war.bitboard import Bitboard
 from fog_of_war.move import Move
 
@@ -27,7 +29,8 @@ class FOWBoard:
         self.__turn: bool = turn
         self.__possible_moves: List[Move] = possible_moves
 
-
+    def __getitem__(self, key: Square) -> Piece:
+        return self.__foggy_board[7-key.rank, 7-key.file]
 
     @property
     def foggy_board(self) -> np.ndarray:

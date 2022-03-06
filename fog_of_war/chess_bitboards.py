@@ -48,33 +48,25 @@ class ChessBitboards(NamedTuple):
         See Piece enum for encoding
         """
         return (
-                Bitboard(self.kings).to_numpy() * Piece['K'].value
-                + Bitboard(self.queens).to_numpy() * Piece['Q'].value
-                + Bitboard(self.pawns).to_numpy() * Piece['P'].value
-                + Bitboard(self.rooks).to_numpy() * Piece['R'].value
-                + Bitboard(self.bishops).to_numpy() * Piece['B'].value
-                + Bitboard(self.knights).to_numpy() * Piece['N'].value
+                       Bitboard(self.kings).to_numpy() * Piece['K'].value
+                       + Bitboard(self.queens).to_numpy() * Piece['Q'].value
+                       + Bitboard(self.pawns).to_numpy() * Piece['P'].value
+                       + Bitboard(self.rooks).to_numpy() * Piece['R'].value
+                       + Bitboard(self.bishops).to_numpy() * Piece['B'].value
+                       + Bitboard(self.knights).to_numpy() * Piece['N'].value
                ) * (
-               Bitboard(self.black).to_numpy() * -1
-               + Bitboard(self.white).to_numpy()
+                       Bitboard(self.black).to_numpy() * -1
+                       + Bitboard(self.white).to_numpy()
                )
 
-    def piece_at(self: ChessBitboards, square: Square) -> Piece | None:
+    def piece_at(self, square: Square) -> Piece | None:
         """If a piece is at square, return its value, else return None"""
-        piece: int
-        if self.white & Bitboard.from_square(square):
-            piece = 1
-        elif self.black & Bitboard.from_square(square):
-            piece = -1
+        piece_bbs: List[int] = [i*(bb & Bitboard.from_square(square))
+                                for bb, i in zip(self, [-1, 1, 1, 2, 3, 4, 5, 6])]
+        if any(piece_bbs):
+            return Piece(sum(piece_bbs[0:2])*sum(piece_bbs[2:]))
         else:
             return None
-
-        for i, board in enumerate(self[2:]):
-            if board & Bitboard.from_square(square):
-                try:
-                    return Piece((i + 1) * piece)
-                except ValueError:
-                    return None
 
     @classmethod
     def new_game(cls) -> ChessBitboards:
@@ -105,7 +97,7 @@ class ChessBitboards(NamedTuple):
                     | Bitboard.from_square(Square.d8)),
 
             kings=(Bitboard.from_square(Square.e8)
-                  | Bitboard.from_square(Square.e1))
+                   | Bitboard.from_square(Square.e1))
         )
 
     def make_move(self, move: Move) -> ChessBitboards:

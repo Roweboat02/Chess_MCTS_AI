@@ -85,12 +85,12 @@ class Square(Enum):
     @property
     def rank(self: Square) -> int:
         """Which rank (row) square is in"""
-        return ((self.value - 1) // 8) + 1
+        return int(self.name[1])
 
     @property
     def file(self: Square) -> int:
         """Which file (col) square is in"""
-        return ((self.value - 1) % 8) + 1
+        return ord(self.name[0])-96
 
 # Didn't want to type out chess cords, but type checker didn't like that much.
 # Thank god for macros
