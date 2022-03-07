@@ -5,7 +5,7 @@
       <excludeFolder url="file://$MODULE_DIR$/Venv_Chess" />
       <excludeFolder url="file://$MODULE_DIR$/chess_venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.9 (chess_venv)" jdkType="Python SDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">
