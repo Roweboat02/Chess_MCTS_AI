@@ -2,9 +2,9 @@ from functools import cached_property
 from typing import List
 
 import numpy as np
-
-from fog_of_war import Piece
+from fog_of_war.piece import Piece
 from fog_of_war.square import Square
+from fog_of_war.chess_bitboards import ChessBitboards
 from fog_of_war.bitboard import Bitboard
 from fog_of_war.move import Move
 
@@ -16,21 +16,24 @@ def _apply_fog(board:np.ndarray, visible:np.ndarray) -> np.ndarray:
 
 class FOWBoard:
     def __init__(self,
-                 numpy_board: np.ndarray,
+                 bitboards: ChessBitboards,
                  turn: bool,
                  visible: Bitboard,
                  possible_moves: List[Move]):
+        
+        numpy_board: np.ndarray = bitboards.to_numpy
+        board: np.ndarray = numpy_board if turn else np.flip(numpy_board, 0)
 
-        board = numpy_board if turn else np.flip(numpy_board, 0)
         vis: np.ndarray = visible.to_numpy()
         self.__visible: np.ndarray = vis if turn else np.flipud(vis)
+
         self.__foggy_board: np.ndarray = _apply_fog(board, self.__visible)
 
         self.__turn: bool = turn
         self.__possible_moves: List[Move] = possible_moves
 
     def __getitem__(self, key: Square) -> Piece:
-        return self.__foggy_board[7-key.rank, 7-key.file]
+        return self.__foggy_board[7 - key.rank, 7 - key.file]
 
     @property
     def foggy_board(self) -> np.ndarray:

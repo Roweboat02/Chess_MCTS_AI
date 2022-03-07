@@ -34,3 +34,4 @@ class Move:
     rook_to: Optional[Square] = None
     rook_frm: Optional[Square] = None
     promotion_to: Optional[Piece] = None
+    resignation:Optional[bool] = None
