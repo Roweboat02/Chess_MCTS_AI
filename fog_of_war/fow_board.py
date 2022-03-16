@@ -9,10 +9,11 @@ from fog_of_war.bitboard import Bitboard
 from fog_of_war.move import Move
 
 
-def _apply_fog(board:np.ndarray, visible:np.ndarray) -> np.ndarray:
+def _apply_fog(board: np.ndarray, visible: np.ndarray) -> np.ndarray:
     foggy_board: np.ndarray = board.copy()
     foggy_board[np.logical_not(visible)] = 15
     return foggy_board
+
 
 class FOWBoard:
     def __init__(self,
@@ -20,7 +21,6 @@ class FOWBoard:
                  turn: bool,
                  visible: Bitboard,
                  possible_moves: List[Move]):
-        
         numpy_board: np.ndarray = bitboards.to_numpy
         board: np.ndarray = numpy_board if turn else np.flip(numpy_board, 0)
 

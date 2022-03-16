@@ -17,7 +17,7 @@ Modified
 from __future__ import annotations
 
 from functools import cached_property
-from typing import NamedTuple, List
+from typing import NamedTuple, List, Dict
 
 import numpy as np
 
@@ -61,12 +61,15 @@ class ChessBitboards(NamedTuple):
 
     def piece_at(self, square: Square) -> Piece | None:
         """If a piece is at square, return its value, else return None"""
-        piece_bbs: List[int] = [i*(bb & Bitboard.from_square(square))
+        piece_bbs: List[int] = [i * bool(bb & Bitboard.from_square(square))
                                 for bb, i in zip(self, [-1, 1, 1, 2, 3, 4, 5, 6])]
         if any(piece_bbs):
-            return Piece(sum(piece_bbs[0:2])*sum(piece_bbs[2:]))
+            return Piece(sum(piece_bbs[0:2]) * sum(piece_bbs[2:]))
         else:
             return None
+
+    def __dict__(self) -> Dict[Square, Piece | None]:
+        return {sqr: self.piece_at(sqr) for sqr in Square}
 
     @classmethod
     def new_game(cls) -> ChessBitboards:

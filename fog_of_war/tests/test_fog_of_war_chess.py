@@ -22,6 +22,7 @@ from fog_of_war.move import Move
 
 class TestFOWChess(TestCase):
     """Test suite for FOWChess functionality"""
+
     def setUp(self):
         """Set up before each test"""
         self.new_game_by_hand: FOWChess = FOWChess(
@@ -158,7 +159,6 @@ class TestFOWChess(TestCase):
         self.black_move_board: FOWChess = (
             self.white_move_board.make_move(self.black_move))
 
-
         self.lone_king_and_rook: FOWChess = FOWChess(
             bitboards=ChessBitboards(
                 white=(Bitboard.from_square(Square.e1)
@@ -190,8 +190,8 @@ class TestFOWChess(TestCase):
         self.assertFalse(FOWChess.new_game() == self.white_move_board_by_hand)
         self.assertFalse(self.white_move_board == self.black_move_board)
         self.assertTrue(
-                self.white_move_board_by_hand
-                == FOWChess.new_game().make_move(self.white_move))
+            self.white_move_board_by_hand
+            == FOWChess.new_game().make_move(self.white_move))
         self.assertTrue(self.black_move_board_by_hand == self.black_move_board)
 
     def test_from_fow(self):
@@ -248,73 +248,73 @@ class TestFOWChess(TestCase):
             Move(frm=Square.b1, to=Square.c3),
         }
         second_move_set: Set[Move] = {
-                # pawns
-                Move(frm=Square.a7, to=Square.a6),
-                Move(frm=Square.a7, to=Square.a5),
-                Move(frm=Square.b7, to=Square.b6),
-                Move(frm=Square.b7, to=Square.b5),
-                Move(frm=Square.c7, to=Square.c6),
-                Move(frm=Square.c7, to=Square.c5),
-                Move(frm=Square.d7, to=Square.d6),
-                Move(frm=Square.d7, to=Square.d5),
-                Move(frm=Square.e7, to=Square.e6),
-                Move(frm=Square.e7, to=Square.e5),
-                Move(frm=Square.f7, to=Square.f6),
-                Move(frm=Square.f7, to=Square.f5),
-                Move(frm=Square.g7, to=Square.g6),
-                Move(frm=Square.g7, to=Square.g5),
-                Move(frm=Square.h7, to=Square.h6),
-                Move(frm=Square.h7, to=Square.h5),
+            # pawns
+            Move(frm=Square.a7, to=Square.a6),
+            Move(frm=Square.a7, to=Square.a5),
+            Move(frm=Square.b7, to=Square.b6),
+            Move(frm=Square.b7, to=Square.b5),
+            Move(frm=Square.c7, to=Square.c6),
+            Move(frm=Square.c7, to=Square.c5),
+            Move(frm=Square.d7, to=Square.d6),
+            Move(frm=Square.d7, to=Square.d5),
+            Move(frm=Square.e7, to=Square.e6),
+            Move(frm=Square.e7, to=Square.e5),
+            Move(frm=Square.f7, to=Square.f6),
+            Move(frm=Square.f7, to=Square.f5),
+            Move(frm=Square.g7, to=Square.g6),
+            Move(frm=Square.g7, to=Square.g5),
+            Move(frm=Square.h7, to=Square.h6),
+            Move(frm=Square.h7, to=Square.h5),
 
-                # knights
-                Move(frm=Square.g8, to=Square.f6),
-                Move(frm=Square.g8, to=Square.h6),
-                Move(frm=Square.b8, to=Square.a6),
-                Move(frm=Square.b8, to=Square.c6),
+            # knights
+            Move(frm=Square.g8, to=Square.f6),
+            Move(frm=Square.g8, to=Square.h6),
+            Move(frm=Square.b8, to=Square.a6),
+            Move(frm=Square.b8, to=Square.c6),
         }
         third_move_set: Set[Move] = {
-                # pawns
-                Move(frm=Square.a2, to=Square.a3),
-                Move(frm=Square.a2, to=Square.a4),
-                Move(frm=Square.b2, to=Square.b3),
-                Move(frm=Square.b2, to=Square.b4),
-                Move(frm=Square.c2, to=Square.c3),
-                Move(frm=Square.c2, to=Square.c4),
-                Move(frm=Square.d2, to=Square.d3),
-                Move(frm=Square.d2, to=Square.d4),
-                Move(frm=Square.f2, to=Square.f3),
-                Move(frm=Square.f2, to=Square.f4),
-                Move(frm=Square.g2, to=Square.g3),
-                Move(frm=Square.g2, to=Square.g4),
-                Move(frm=Square.h2, to=Square.h3),
-                Move(frm=Square.h2, to=Square.h4),
+            # pawns
+            Move(frm=Square.a2, to=Square.a3),
+            Move(frm=Square.a2, to=Square.a4),
+            Move(frm=Square.b2, to=Square.b3),
+            Move(frm=Square.b2, to=Square.b4),
+            Move(frm=Square.c2, to=Square.c3),
+            Move(frm=Square.c2, to=Square.c4),
+            Move(frm=Square.d2, to=Square.d3),
+            Move(frm=Square.d2, to=Square.d4),
+            Move(frm=Square.f2, to=Square.f3),
+            Move(frm=Square.f2, to=Square.f4),
+            Move(frm=Square.g2, to=Square.g3),
+            Move(frm=Square.g2, to=Square.g4),
+            Move(frm=Square.h2, to=Square.h3),
+            Move(frm=Square.h2, to=Square.h4),
 
-                # The pawn that moved
-                Move(frm=Square.e4, to=Square.e5),
-                Move(frm=Square.e4, to=Square.d5),
+            # The pawn that moved
+            Move(frm=Square.e4, to=Square.e5),
+            Move(frm=Square.e4, to=Square.d5),
 
-                # knights
-                Move(frm=Square.g1, to=Square.f3),
-                Move(frm=Square.g1, to=Square.h3),
-                Move(frm=Square.g1, to=Square.e2),
-                Move(frm=Square.b1, to=Square.a3),
-                Move(frm=Square.b1, to=Square.c3),
+            # knights
+            Move(frm=Square.g1, to=Square.f3),
+            Move(frm=Square.g1, to=Square.h3),
+            Move(frm=Square.g1, to=Square.e2),
+            Move(frm=Square.b1, to=Square.a3),
+            Move(frm=Square.b1, to=Square.c3),
 
-                # bishops
-                Move(frm=Square.f1, to=Square.e2),
-                Move(frm=Square.f1, to=Square.d3),
-                Move(frm=Square.f1, to=Square.c4),
-                Move(frm=Square.f1, to=Square.b5),
-                Move(frm=Square.f1, to=Square.a6),
+            # bishops
+            Move(frm=Square.f1, to=Square.e2),
+            Move(frm=Square.f1, to=Square.d3),
+            Move(frm=Square.f1, to=Square.c4),
+            Move(frm=Square.f1, to=Square.b5),
+            Move(frm=Square.f1, to=Square.a6),
 
-                # Queens
-                Move(frm=Square.d1, to=Square.e2),
-                Move(frm=Square.d1, to=Square.f3),
-                Move(frm=Square.d1, to=Square.g4),
-                Move(frm=Square.d1, to=Square.h5),
+            # Queens
+            Move(frm=Square.d1, to=Square.e2),
+            Move(frm=Square.d1, to=Square.f3),
+            Move(frm=Square.d1, to=Square.g4),
+            Move(frm=Square.d1, to=Square.h5),
 
-                # kings
-                Move(frm=Square.e1, to=Square.e2)
+            # kings
+            Move(frm=Square.e1, to=Square.e2)
         }
         lone_k_and_r_moves: Set[Move] = {
             # king
@@ -376,120 +376,3 @@ class TestFOWChess(TestCase):
         self.assertIsNone(FOWChess.new_game().winner)
         self.assertTrue(self.lone_king_and_rook.winner)
 
-    def test_board_as_numpy(self):
-        """Test the conversion to a numpy array representation is as expected"""
-        self.assertTrue(np.equal(FOWChess.new_game().to_numpy, self.new_game_numpy).all())
-        self.assertTrue(np.equal(self.white_move_board.to_numpy, self.white_move_numpy).all())
-        self.assertTrue(np.equal(self.black_move_board.to_numpy, self.black_move_numpy).all())
-
-    def test_black_board(self):
-        """Test the conversion to a numpy array representation, from black's POV is as expected"""
-        self.assertTrue(
-                np.equal(
-                        FOWChess.new_game().black_board,
-                        np.flipud(self.new_game_numpy)).all())
-        self.assertTrue(
-                np.equal(
-                        self.white_move_board.black_board,
-                        np.flipud(self.white_move_numpy)).all())
-        self.assertTrue(
-                np.equal(self.black_move_board.black_board,
-                         np.flipud(self.black_move_numpy)).all())
-
-    def test_white_board(self):
-        """Test the conversion to a numpy array representation, from white's POV is as expected"""
-        self.assertTrue(
-                np.equal(FOWChess.new_game().white_board,
-                         self.new_game_numpy).all())
-        self.assertTrue(
-                np.equal(self.white_move_board.white_board,
-                         self.white_move_numpy).all())
-        self.assertTrue(
-                np.equal(self.black_move_board.white_board,
-                         self.black_move_numpy).all())
-
-    def test_black_fog(self):
-        """Test visable square generation for black is working"""
-        fog = np.zeros((8, 8))
-        fog[7] = [1, 1, 1, 1, 1, 1, 1, 1]
-        fog[6] = [1, 1, 1, 1, 1, 1, 1, 1]
-        fog[5] = [1, 1, 1, 1, 1, 1, 1, 1]
-        fog[4] = [1, 1, 1, 1, 1, 1, 1, 1]
-        self.assertTrue(np.equal(FOWChess.new_game().visible_to_black, fog).all())
-        self.assertTrue(np.equal(self.white_move_board.visible_to_black, fog).all())
-        fog[3, 3] = 1
-        fog[3, 4] = 1
-        fog[2, 7] = 1
-        fog[3, 6] = 1
-        self.assertTrue(np.equal(self.black_move_board.visible_to_black, fog).all())
-
-    def test_white_fog(self):
-        """Test visable square generation for white is working"""
-        fog = np.zeros((8, 8))
-        fog[7] = [1, 1, 1, 1, 1, 1, 1, 1]
-        fog[6] = [1, 1, 1, 1, 1, 1, 1, 1]
-        fog[5] = [1, 1, 1, 1, 1, 1, 1, 1]
-        fog[4] = [1, 1, 1, 1, 1, 1, 1, 1]
-        self.assertTrue(np.equal(FOWChess.new_game().visible_to_white, fog).all())
-        fog[3, 4] = 1
-        fog[2, 0] = 1
-        fog[3, 1] = 1
-        fog[3, 7] = 1
-        fog[5, 4] = 0
-        self.assertTrue(np.equal(self.white_move_board.visible_to_white, fog).all())
-        fog[3, 3] = 1
-        self.assertTrue(np.equal(self.black_move_board.visible_to_white, fog).all())
-
-    def test_white_foggy_board(self):
-        """Test if foggy board from white's POV is working as expected"""
-        self.new_game_numpy[0] = [15, 15, 15, 15, 15, 15, 15, 15]
-        self.new_game_numpy[1] = [15, 15, 15, 15, 15, 15, 15, 15]
-        self.new_game_numpy[2] = [15, 15, 15, 15, 15, 15, 15, 15]
-        self.new_game_numpy[3] = [15, 15, 15, 15, 15, 15, 15, 15]
-        self.assertTrue(np.equal(self.new_game_numpy, FOWChess.new_game().white_foggy_board).all())
-
-        self.white_move_numpy[0]= [15, 15, 15, 15, 15, 15, 15, 15]
-        self.white_move_numpy[1] = [15, 15, 15, 15, 15, 15, 15, 15]
-        self.white_move_numpy[2] = [0, 15, 15, 15, 15, 15, 15, 15]
-        self.white_move_numpy[3] = [15, 0, 15, 15, 0, 15, 15, 0]
-        self.white_move_numpy[5] = [0, 0, 0, 0, 15, 0, 0, 0]
-        self.assertTrue(
-                np.equal(
-                        self.white_move_numpy,
-                        self.white_move_board.white_foggy_board).all())
-
-        self.black_move_numpy[0]= [15, 15, 15, 15, 15, 15, 15, 15]
-        self.black_move_numpy[1] = [15, 15, 15, 15, 15, 15, 15, 15]
-        self.black_move_numpy[2] = [0, 15, 15, 15, 15, 15, 15, 15]
-        self.black_move_numpy[3] = [15, 0, 15, -1, 0, 15, 15, 0]
-        self.black_move_numpy[5] = [0, 0, 0, 0, 15, 0, 0, 0]
-        self.assertTrue(
-                np.equal(
-                        self.black_move_numpy,
-                        self.black_move_board.white_foggy_board).all())
-
-    def test_black_foggy_board(self):
-        """Test if foggy board from black's POV is working as expected"""
-        self.new_game_numpy[7] = [15, 15, 15, 15, 15, 15, 15, 15]
-        self.new_game_numpy[6] = [15, 15, 15, 15, 15, 15, 15, 15]
-        self.new_game_numpy[5] = [15, 15, 15, 15, 15, 15, 15, 15]
-        self.new_game_numpy[4] = [15, 15, 15, 15, 15, 15, 15, 15]
-        self.new_game_numpy = np.flipud(self.new_game_numpy)
-        self.assertTrue(
-                np.equal(
-                        self.new_game_numpy,
-                        FOWChess.new_game().black_foggy_board).all())
-
-        self.assertTrue(
-                np.equal(self.new_game_numpy,
-                         self.white_move_board.black_foggy_board).all())
-
-        self.black_move_numpy[7] = [15, 15, 15, 15, 15, 15, 15, 15]
-        self.black_move_numpy[6] = [15, 15, 15, 15, 15, 15, 15, 15]
-        self.black_move_numpy[5] = [15, 15, 15, 15, 15, 15, 15, 0]
-        self.black_move_numpy[4] = [15, 15, 15, 0, 1, 15, 0, 15]
-        self.black_move_numpy = np.flipud(self.black_move_numpy)
-        self.assertTrue(
-                np.equal(
-                        self.black_move_numpy,
-                        self.black_move_board.black_foggy_board).all())
