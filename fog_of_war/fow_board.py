@@ -21,7 +21,7 @@ class FOWBoard:
                  turn: bool,
                  visible: Bitboard,
                  possible_moves: List[Move]):
-        numpy_board: np.ndarray = bitboards.to_numpy
+        numpy_board: np.ndarray = bitboards.to_numpy()
         board: np.ndarray = numpy_board if turn else np.flip(numpy_board, 0)
 
         vis: np.ndarray = visible.to_numpy()

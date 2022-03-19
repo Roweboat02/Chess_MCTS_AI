@@ -41,7 +41,6 @@ class ChessBitboards(NamedTuple):
     queens: Bitboard
     kings: Bitboard
 
-    @cached_property
     def to_numpy(self) -> np.ndarray:
         """
         A numpy representation of the chess board, using integers.
@@ -67,9 +66,6 @@ class ChessBitboards(NamedTuple):
             return Piece(sum(piece_bbs[0:2]) * sum(piece_bbs[2:]))
         else:
             return None
-
-    def __dict__(self) -> Dict[Square, Piece | None]:
-        return {sqr: self.piece_at(sqr) for sqr in Square}
 
     @classmethod
     def new_game(cls) -> ChessBitboards:
