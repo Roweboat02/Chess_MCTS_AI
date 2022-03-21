@@ -2,6 +2,15 @@ from unittest import TestCase
 import numpy as np
 from fog_of_war.fog_of_war_chess import FOWChess
 
+"""
+Broke FOWChess up a bit, some responsibility moved to FOWBoard.
+Haven't had a chance to change FOWChess's tests of that functionality to FOWBoard.
+So they're just copied and pasted here for now.
+
+-Noah 2022/03/21
+"""
+
+
 class TestFOWBoard(TestCase):
     def test_foggy_board(self):
         self.fail()
