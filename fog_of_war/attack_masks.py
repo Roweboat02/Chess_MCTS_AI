@@ -20,6 +20,9 @@ def _square_distance(square_a: Square, square_b: Square) -> int:
     return max(abs(square_a.rank - square_b.rank), abs(square_a.file - square_b.file))
 
 
+def _small_square_distance(square_a: Square, square_b: Square) -> int:
+    """Rank or file difference (whichever is least)"""
+    return min(abs(square_a.rank - square_b.rank), abs(square_a.file - square_b.file))
 def _find_possible_sliding_moves(square: Square, occupied: Bitboard, deltas: Iterable[int]) -> Bitboard:
     """
     Repeatedly add a delta to square until resultant is outside bitboard range,
